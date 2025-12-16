@@ -1,0 +1,33 @@
+import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import { apiRequest } from '../../transport';
+import { toInt, updateDisplayOptions, wrapDeleteSuccess } from '../../helpers/utils';
+
+const displayOptions: IDisplayOptions = {
+	show: {
+		resource: ['people'],
+		operation: ['delete'],
+	},
+};
+
+const properties: INodeProperties[] = [
+	{
+		displayName: 'Person ID',
+		name: 'id',
+		type: 'string',
+		default: '',
+		required: true,
+		description: 'The ID of the person to delete',
+	},
+];
+
+export const description = updateDisplayOptions(displayOptions, properties);
+
+export async function execute(
+	this: IExecuteFunctions,
+	i: number,
+): Promise<INodeExecutionData[]> {
+	const idRaw = this.getNodeParameter('id', i) as string;
+	const id = toInt(idRaw, 'Person ID', this.getNode(), i);
+	await apiRequest.call(this, 'DELETE', `/people/${id}`);
+	return wrapDeleteSuccess();
+}
