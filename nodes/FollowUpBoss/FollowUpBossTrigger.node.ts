@@ -257,7 +257,7 @@ export class FollowUpBossTrigger implements INodeType {
                     {
                         name: 'Event',
                         value: 'event',
-                        description: 'Returns the raw webhook event payload',
+                        description: 'Returns the raw webhook payload. Useful for accessing delta details like added tags or new stage values.',
                     },
                 ],
                 default: 'eventData',
