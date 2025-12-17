@@ -75,11 +75,14 @@ async function makeRequest(
 
     const maxRetries = MAX_RETRIES;
     let attempt = 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let lastError: any;
 
     while (attempt <= maxRetries) {
         try {
             return await context.helpers.httpRequest(options) as IDataObject;
         } catch (error) {
+            lastError = error;
             attempt++;
             const status = error.response?.status;
 
@@ -100,13 +103,14 @@ async function makeRequest(
             if (status >= 400 && status < 500) {
                 const errorMessage = error.response?.data?.errorMessage;
                 if (errorMessage) {
-                    throw new NodeApiError(context.getNode(), error, { message: `Follow Up Boss Error: ${errorMessage}` });
+                    throw new NodeApiError(context.getNode(), error, { message: `Follow Up Boss Error (${status}): ${errorMessage}` });
                 }
-                throw error;
+                // Wrap raw 4xx errors if no message provided
+                throw new NodeApiError(context.getNode(), error, { message: `Follow Up Boss Error (${status})` });
             }
 
             if (attempt > maxRetries) {
-                throw error;
+                break;
             }
 
             // 5xx Server Errors
@@ -116,11 +120,21 @@ async function makeRequest(
                 continue;
             }
 
-            throw error;
+            // Wrap any other errors (e.g. Network errors)
+            throw new NodeApiError(context.getNode(), error, { message: `Follow Up Boss Error (${status}): ${error.message}` });
         }
     }
 
-    throw new Error('Maximum retries exceeded');
+    // Attempt to extract helpful error message from the last error, even if it was 5xx
+    const errorMessage = lastError?.response?.data?.errorMessage;
+    const finalStatus = lastError?.response?.status;
+    const statusInsert = finalStatus ? ` (${finalStatus})` : '';
+
+    if (errorMessage) {
+        throw new NodeApiError(context.getNode(), lastError, { message: `Follow Up Boss Error${statusInsert}: ${errorMessage}` });
+    }
+
+    throw new NodeApiError(context.getNode(), lastError, { message: `Failed to connect to Follow Up Boss API after multiple attempts.` });
 }
 
 export async function apiRequest(

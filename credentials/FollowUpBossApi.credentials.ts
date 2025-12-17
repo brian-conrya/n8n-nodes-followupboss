@@ -16,6 +16,12 @@ export class FollowUpBossApi implements ICredentialType {
 
 	properties: INodeProperties[] = [
 		{
+			displayName: '⚠️ These credentials generate your webhook URLs to allow for working with multiple Follow Up Boss accounts. Changing ANY value here will BREAK any Active Triggers using these credentials.',
+			name: 'warning',
+			type: 'notice',
+			default: '',
+		},
+		{
 			displayName: 'API Key',
 			name: 'apiKey',
 			type: 'string',
