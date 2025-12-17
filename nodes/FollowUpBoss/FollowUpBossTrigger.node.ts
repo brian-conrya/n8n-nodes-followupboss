@@ -117,10 +117,10 @@ export class FollowUpBossTrigger implements INodeType {
         ],
         properties: [
             {
-                displayName: 'Limitation Notice',
+                displayName: 'Limitation: Only 2 active workflows allowed per event type, account, and system. If you need more, use a single "Dispatcher" workflow to receive the webhook and trigger other workflows.',
                 name: 'limitationNotice',
                 type: 'notice',
-                default: 'Limitation: Only 2 active workflows allowed per event type, account, and system. If you need more, use a single "Dispatcher" workflow to receive the webhook and trigger other workflows.',
+                default: '',
             },
             {
                 displayName: 'Event',
