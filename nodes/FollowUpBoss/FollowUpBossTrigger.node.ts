@@ -72,23 +72,6 @@ const EVENT_TRIGGER_MAP: { [key: string]: string } = {
     'Threaded Reply Updated': 'threadedReplyUpdated',
 };
 
-
-
-
-// Helper to extract common webhook context
-async function getWebhookContext(hook: IHookFunctions) {
-    const baseUrl = hook.getNodeWebhookUrl('default');
-    if (!baseUrl) {
-        throw new NodeOperationError(hook.getNode(), 'Could not generate webhook URL');
-    }
-
-    const webhookUrl = `${baseUrl}?source=n8n`;
-    const eventDisplayName = hook.getNodeParameter('event') as string;
-    const event = EVENT_TRIGGER_MAP[eventDisplayName];
-
-    return { baseUrl, event, webhookUrl };
-}
-
 export class FollowUpBossTrigger implements INodeType {
     description: INodeTypeDescription = {
         displayName: 'Follow Up Boss Trigger',
@@ -110,14 +93,13 @@ export class FollowUpBossTrigger implements INodeType {
                 name: 'default',
                 httpMethod: 'POST',
                 responseMode: 'onReceived',
-                path: 'followupboss',
-                // Note: The actual path is dynamically generated in webhookMethods
-                // based on credentials to support multiple FUB accounts
+                path: 'followupboss-n8n',
+                restartWebhook: true,
             },
         ],
         properties: [
             {
-                displayName: 'Limitation: Only 2 active workflows allowed per event type, account, and system. If you need more, use a single "Dispatcher" workflow to receive the webhook and trigger other workflows.',
+                displayName: 'Only 1 active workflow per event (the 2nd slot is reserved for testing). Activating a new workflow will disconnect any previous one for this event. Need more? Use an Execute Workflow node to fan out from a single trigger.',
                 name: 'limitationNotice',
                 type: 'notice',
                 default: '',
@@ -263,7 +245,6 @@ export class FollowUpBossTrigger implements INodeType {
                 default: 'eventData',
                 description: 'Choose whether to return the enriched event data or the raw event payload. Note: Delete events will always return the raw event payload as the resource no longer exists.',
             },
-
         ],
         usableAsTool: true,
     };
@@ -271,83 +252,83 @@ export class FollowUpBossTrigger implements INodeType {
     webhookMethods = {
         default: {
             async checkExists(this: IHookFunctions): Promise<boolean> {
-                const { webhookUrl, event } = await getWebhookContext(this);
+                const webhookUrl = this.getNodeWebhookUrl('default');
+                if (!webhookUrl) return false;
+
+                const eventDisplayName = this.getNodeParameter('event') as string;
+                const event = EVENT_TRIGGER_MAP[eventDisplayName];
+                const currentMode = webhookUrl.includes('/webhook-test') ? 'test' : 'production';
 
                 try {
-                    // Optimized: Filter by event on the server side
+                    // Fetch existing webhooks for this event
                     const existingWebhooksResponse = await apiRequest.call(this, 'GET', '/webhooks', {}, { event });
-                    const eventWebhooks = (existingWebhooksResponse.webhooks || []) as Array<{ id: number; event: string; url: string }>;
+                    const existingWebhooks = (existingWebhooksResponse.webhooks || []) as Array<{ id: number; event: string; url: string }>;
 
-                    // Check for exact match (Idempotency)
-                    const exactMatch = eventWebhooks.some(w => w.url === webhookUrl);
-                    if (exactMatch) {
+                    // Idempotency (Check if ALREADY registered)
+                    if (existingWebhooks.some(w => w.url === webhookUrl)) {
                         return true;
                     }
 
-                    if (eventWebhooks.length < MAX_WEBHOOKS_PER_EVENT) {
-                        return false; // Proceed to create
-                    }
+                    // Like-for-Like Purge
+                    // Auto-Disconnect other workflows in the SAME mode (Prod kills Prod, Test kills Test).
+                    const n8nCandidates = existingWebhooks.filter(w => w.url.includes('followupboss-n8n'));
 
-                    // Identify candidates: Must allow us to claim ownership (source=n8n)
-                    const n8nCandidates = eventWebhooks.filter(w => {
-                        return w.url.includes('source=n8n');
-                    });
-
-                    // Purge of Test Webhooks & Stale Tunnels
                     for (const w of n8nCandidates) {
-                        const isTestWebhook = w.url.includes('/webhook-test/');
-                        // If it's a tunnel URL (hooks.n8n.cloud) and NOT the current one, it's a stale session.
-                        const isStaleTunnel = w.url.includes('hooks.n8n.cloud') && w.url !== webhookUrl;
+                        const candidateMode = w.url.includes('/webhook-test') ? 'test' : 'production';
 
-                        if (isTestWebhook || isStaleTunnel) {
+                        // Delete if: Same Mode (and not current URL)
+                        if (candidateMode === currentMode && w.url !== webhookUrl) {
                             try {
                                 await apiRequest.call(this, 'DELETE', `/webhooks/${w.id}`);
-                                // Remove from our local counts
-                                const index = eventWebhooks.indexOf(w);
-                                if (index > -1) eventWebhooks.splice(index, 1);
                             } catch {
                                 // Ignore delete errors
                             }
                         }
                     }
 
-                    // Return false to let 'create' execute, which will perform another check and throw the descriptive error.
+                    // Always return false to force 'create' execution (unless Idempotency matched earlier).
                     return false;
 
                 } catch {
-                    // If we can't check, assume it doesn't exist so we try to create it (and fail there)
+                    // If check fails, return false to attempt creation and let it fail there if needed.
                     return false;
                 }
             },
             async create(this: IHookFunctions): Promise<boolean> {
-                const { baseUrl, webhookUrl, event } = await getWebhookContext(this);
+                const webhookUrl = this.getNodeWebhookUrl('default');
+                if (!webhookUrl) return false;
 
-                if (baseUrl.includes('//localhost')) {
+                const eventDisplayName = this.getNodeParameter('event') as string;
+                const event = EVENT_TRIGGER_MAP[eventDisplayName];
+
+                if (webhookUrl.includes('//localhost')) {
                     throw new NodeOperationError(
                         this.getNode(),
                         'The Webhook cannot work on "localhost". Please, either setup n8n on a custom domain or start with "--tunnel"!',
                     );
                 }
 
-                // Fetch existing webhooks for this event only (Server-side filtering)
+                // Fetch current state (after checkExists cleanup)
                 const existingWebhooksResponse = await apiRequest.call(this, 'GET', '/webhooks', {}, { event });
-                const eventWebhooks = (existingWebhooksResponse.webhooks || []) as Array<{ id: number; event: string; url: string }>;
+                const existingWebhooks = (existingWebhooksResponse.webhooks || []) as Array<{ id: number; event: string; url: string }>;
 
-                // Check for duplicate URL within this event
-                const existingWebhook = eventWebhooks.find(w => w.url === webhookUrl);
-
+                // Idempotency: Last check if it exists
+                const existingWebhook = existingWebhooks.find(w => w.url === webhookUrl);
                 if (existingWebhook) {
-                    // If it exists, just use it (Idempotency)
                     const webhookData = this.getWorkflowStaticData('node');
                     webhookData.webhookId = existingWebhook.id;
                     return true;
                 }
 
-                // Check Limit using constant
-                if (eventWebhooks.length >= MAX_WEBHOOKS_PER_EVENT) {
-                    throw new NodeOperationError(this.getNode(), `Limit Reached: Follow Up Boss allows max ${MAX_WEBHOOKS_PER_EVENT} active workflows for '${event}'. Please deactivate one or use a Dispatcher workflow.`);
+                // Capacity Check: If limits are still full, it must be External/Zapier webhooks blocking us.
+                if (existingWebhooks.length >= MAX_WEBHOOKS_PER_EVENT) {
+                    throw new NodeOperationError(
+                        this.getNode(),
+                        `Maximum webhook limit reached. We attempted to clean up old n8n webhooks, but the slots are still full. This usually means external integrations (like Zapier or other tools) are using all available slots. Please manually remove one via the Follow Up Boss API.`
+                    );
                 }
 
+                // Create
                 const body = {
                     event,
                     url: webhookUrl,
@@ -361,7 +342,6 @@ export class FollowUpBossTrigger implements INodeType {
                 return true;
             },
             async delete(this: IHookFunctions): Promise<boolean> {
-                await getWebhookContext(this);
                 const webhookData = this.getWorkflowStaticData('node');
                 const webhookId = webhookData.webhookId as number;
 
@@ -438,7 +418,7 @@ export class FollowUpBossTrigger implements INodeType {
         if (eventType === 'peopleTagsCreated') {
             const tagFilter = this.getNodeParameter('tagFilter', {}) as IDataObject;
             // Only filter if usage of tags is specified (optional filter)
-            if (tagFilter.tags && Array.isArray(tagFilter.tags) && tagFilter.tags.length > 0) {
+            if (tagFilter.tags) {
                 const data = body.data as IDataObject;
                 const tags = data.tags as string[];
                 const filterTagsList = tagFilter.tags as IDataObject[];
