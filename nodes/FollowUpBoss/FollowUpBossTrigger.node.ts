@@ -94,7 +94,7 @@ export class FollowUpBossTrigger implements INodeType {
                 httpMethod: 'POST',
                 responseMode: 'onReceived',
                 path: 'followupboss-n8n',
-                restartWebhook: true,
+                ndvHideUrl: true,
             },
         ],
         properties: [
@@ -259,13 +259,34 @@ export class FollowUpBossTrigger implements INodeType {
                 const event = EVENT_TRIGGER_MAP[eventDisplayName];
                 const currentMode = webhookUrl.includes('/webhook-test') ? 'test' : 'production';
 
+                const webhookData = this.getWorkflowStaticData('node');
+
+                // Detect Configuration Change (Event or URL change)
+                if (webhookData.webhookId && (webhookData.registeredEvent !== event || webhookData.registeredUrl !== webhookUrl)) {
+                    // Config changed, clean up the OLD webhook first
+                    try {
+                        await apiRequest.call(this, 'DELETE', `/webhooks/${webhookData.webhookId}`);
+                    } catch {
+                        // Ignore errors (webhook might already be gone)
+                    }
+                    delete webhookData.webhookId;
+                    delete webhookData.registeredEvent;
+                    delete webhookData.registeredUrl;
+                    return false;
+                }
+
                 try {
                     // Fetch existing webhooks for this event
                     const existingWebhooksResponse = await apiRequest.call(this, 'GET', '/webhooks', {}, { event });
                     const existingWebhooks = (existingWebhooksResponse.webhooks || []) as Array<{ id: number; event: string; url: string }>;
 
-                    // Idempotency (Check if ALREADY registered)
-                    if (existingWebhooks.some(w => w.url === webhookUrl)) {
+                    // Idempotency (Check if ALREADY registered with the current configuration)
+                    const matchedWebhook = existingWebhooks.find(w => w.url === webhookUrl);
+                    if (matchedWebhook) {
+                        // Update static data just in case it was out of sync
+                        webhookData.webhookId = matchedWebhook.id;
+                        webhookData.registeredEvent = event;
+                        webhookData.registeredUrl = webhookUrl;
                         return true;
                     }
 
@@ -314,9 +335,12 @@ export class FollowUpBossTrigger implements INodeType {
 
                 // Idempotency: Last check if it exists
                 const existingWebhook = existingWebhooks.find(w => w.url === webhookUrl);
+                const webhookData = this.getWorkflowStaticData('node');
+
                 if (existingWebhook) {
-                    const webhookData = this.getWorkflowStaticData('node');
                     webhookData.webhookId = existingWebhook.id;
+                    webhookData.registeredEvent = event;
+                    webhookData.registeredUrl = webhookUrl;
                     return true;
                 }
 
@@ -336,8 +360,9 @@ export class FollowUpBossTrigger implements INodeType {
 
                 const response = await apiRequest.call(this, 'POST', '/webhooks', body);
 
-                const webhookData = this.getWorkflowStaticData('node');
                 webhookData.webhookId = response.id as number;
+                webhookData.registeredEvent = event;
+                webhookData.registeredUrl = webhookUrl;
 
                 return true;
             },
@@ -353,6 +378,8 @@ export class FollowUpBossTrigger implements INodeType {
                     }
                 }
                 delete webhookData.webhookId;
+                delete webhookData.registeredEvent;
+                delete webhookData.registeredUrl;
                 return true;
             },
         },
