@@ -249,7 +249,10 @@ export class FollowUpBoss implements INodeType {
 		],
 	};
 
-	methods = methods;
+	methods = {
+		loadOptions: methods.loadOptions,
+		listSearch: methods.listSearch,
+	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		return await router.call(this);

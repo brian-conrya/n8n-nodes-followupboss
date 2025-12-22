@@ -1,3 +1,5 @@
-import * as loadOptions from './loadOptions';
+import * as loadOptionsModule from './loadOptions';
+import * as listSearchModule from './listSearch';
 
-export { loadOptions };
+export const loadOptions = { ...loadOptionsModule };
+export const listSearch = { ...listSearchModule };

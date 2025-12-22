@@ -159,7 +159,7 @@ export function getCommonFiltersProperties(): INodeProperties[] {
 			name: 'ids',
 			type: 'string',
 			default: '',
-			description: 'A comma-separated list of record IDs to retrieve',
+			description: 'A comma-separated list of IDs to retrieve',
 			placeholder: 'e.g. 1,2,3',
 		},
 
@@ -178,6 +178,92 @@ export function getCommonFiltersProperties(): INodeProperties[] {
 			description: 'Filter records updated before a given date/time',
 		},
 	];
+}
+
+export function getPersonIdProperty(): INodeProperties {
+	return {
+		displayName: 'Person',
+		name: 'personId',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
+		required: true,
+		modes: [
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: '123',
+				validation: [
+					{
+						type: 'regex',
+						properties: {
+							regex: '[0-9]+',
+							errorMessage: 'Not a valid Person ID',
+						},
+					},
+				],
+			},
+			{
+				displayName: 'By URL',
+				name: 'url',
+				type: 'string',
+				placeholder: 'https://subdomain.followupboss.com/2/people/view/123',
+				extractValue: {
+					type: 'regex',
+					regex: 'https://.*\\.followupboss\\.com/.*people/view/(\\d+)',
+				},
+			},
+			{
+				displayName: 'From list',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a person...',
+				typeOptions: {
+					searchListMethod: 'getPeople',
+					searchFilterRequired: true,
+					searchable: true,
+				},
+			},
+		],
+	};
+}
+
+export function getTaskIdProperty(): INodeProperties {
+	return {
+		displayName: 'Task ID',
+		name: 'taskId',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
+		required: true,
+		modes: [
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: '123',
+				validation: [
+					{
+						type: 'regex',
+						properties: {
+							regex: '[0-9]+',
+							errorMessage: 'Not a valid Task ID',
+						},
+					},
+				],
+			},
+			{
+				displayName: 'From list',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a task...',
+				typeOptions: {
+					searchListMethod: 'getTasks',
+					searchFilterRequired: true,
+					searchable: true,
+				},
+			},
+		],
+	};
 }
 
 export function addCommonParameters(
@@ -335,13 +421,12 @@ export function wrapDeleteSuccess(): INodeExecutionData[] {
 }
 
 export function flattenPersonContactInfo(person: IDataObject): IDataObject {
-    const newPerson = { ...person };
-    if (newPerson.emails && Array.isArray(newPerson.emails) && newPerson.emails.length > 0) {
-        newPerson.email = (newPerson.emails[0] as IDataObject).value;
-    }
-    if (newPerson.phones && Array.isArray(newPerson.phones) && newPerson.phones.length > 0) {
-        newPerson.phone = (newPerson.phones[0] as IDataObject).value;
-    }
-    return newPerson;
+	const newPerson = { ...person };
+	if (newPerson.emails && Array.isArray(newPerson.emails) && newPerson.emails.length > 0) {
+		newPerson.email = (newPerson.emails[0] as IDataObject).value;
+	}
+	if (newPerson.phones && Array.isArray(newPerson.phones) && newPerson.phones.length > 0) {
+		newPerson.phone = (newPerson.phones[0] as IDataObject).value;
+	}
+	return newPerson;
 }
-

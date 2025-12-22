@@ -189,3 +189,26 @@ export async function apiRequestAllItems(
 
     return returnData;
 }
+
+export async function apiRequestPagination(
+    this: IExecuteFunctions | ILoadOptionsFunctions,
+    method: string,
+    endpoint: string,
+    body: IDataObject = {},
+    qs: IDataObject = {},
+    url?: string,
+    limit?: number,
+): Promise<{ data: IDataObject[]; nextUrl?: string }> {
+    const requestQs = { ...qs };
+    if (!url && !requestQs.limit) {
+        requestQs.limit = limit || PAGINATION_LIMIT;
+    }
+    const response = await makeRequest(this, method, endpoint, body, requestQs, url);
+    const data: IDataObject[] = [];
+    const dataKey = Object.keys(response).find((k) => Array.isArray(response[k]));
+    if (dataKey) {
+        data.push(...(response[dataKey] as IDataObject[]));
+    }
+    const nextUrl = (response._metadata as IDataObject)?.nextLink as string | undefined;
+    return { data, nextUrl };
+}
