@@ -1,6 +1,6 @@
 import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getThreadedReplyIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,11 +11,7 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Threaded Reply ID',
-		name: 'id',
-		type: 'string',
-		default: '',
-		required: true,
+		...getThreadedReplyIdProperty(true, 'id'),
 		description: 'ID of the threaded reply to retrieve',
 	},
 ];

@@ -1,6 +1,6 @@
-import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getAppointmentIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,12 +11,8 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Appointment ID',
-		name: 'appointmentId',
-		type: 'string',
-		default: '',
-		required: true,
-		description: 'ID of the appointment to retrieve',
+		...getAppointmentIdProperty(),
+		description: 'ID of the appointment to retrieve. Choose from the list, or specify an ID.',
 	},
 ];
 
@@ -26,7 +22,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const appointmentIdRaw = this.getNodeParameter('appointmentId', index) as string;
+	const appointmentIdRaw = (this.getNodeParameter('appointmentId', index) as IDataObject).value as string;
 	const appointmentId = toInt(appointmentIdRaw, 'Appointment ID', this.getNode(), index);
 	const response = await apiRequest.call(this, 'GET', `/appointments/${appointmentId}`);
 	return wrapData(response);

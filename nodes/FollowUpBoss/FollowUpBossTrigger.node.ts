@@ -202,7 +202,7 @@ export class FollowUpBossTrigger implements INodeType {
                 type: 'multiOptions',
                 default: [],
                 typeOptions: {
-                    loadOptionsMethod: 'getStages',
+                    loadOptionsMethod: 'getStageNames',
                 },
                 displayOptions: {
                     show: {

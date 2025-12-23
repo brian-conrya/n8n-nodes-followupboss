@@ -34,7 +34,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const personIdRaw = this.getNodeParameter('personId', i) as string;
+	const personIdRaw = (this.getNodeParameter('personId', i) as IDataObject).value as string;
 	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	const collaboratorIds = this.getNodeParameter('collaboratorIds', i) as number[];
 

@@ -3,6 +3,10 @@ import { apiRequestAllItems } from '../../transport';
 import {
 	addCommonParameters,
 	createGetAllOperationDescription,
+	getAppointmentOutcomeIdProperty,
+	getAppointmentTypeIdProperty,
+	getUserIdProperty,
+	toInt,
 	wrapData,
 } from '../../helpers/utils';
 
@@ -17,44 +21,20 @@ const resourceSpecificOptions: INodeProperties[] = [
 		description: 'Whether to include appointments that have been deleted',
 	},
 	{
-		displayName: 'User Name or ID',
-		name: 'userId',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getUsers',
-		},
-		default: '',
-		description: 'Filter by user ID. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		...getUserIdProperty('User', 'userId', false),
+		description: 'Filter by user ID. Choose from the list, or specify an ID.',
 	},
 	{
-		displayName: 'Created By Name or ID',
-		name: 'createdById',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getUsers',
-		},
-		default: '',
-		description: 'Filter by creator ID. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		...getUserIdProperty('Created By', 'createdById', false),
+		description: 'Filter by creator ID. Choose from the list, or specify an ID.',
 	},
 	{
-		displayName: 'Type Name or ID',
-		name: 'typeId',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getAppointmentTypes',
-		},
-		default: '',
-		description: 'Filter by appointment type ID. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		...getAppointmentTypeIdProperty(false),
+		description: 'Filter by appointment type ID. Choose from the list, or specify an ID.',
 	},
 	{
-		displayName: 'Outcome Name or ID',
-		name: 'outcomeId',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getAppointmentOutcomes',
-		},
-		default: '',
-		description: 'Filter by appointment outcome ID. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		...getAppointmentOutcomeIdProperty(false),
+		description: 'Filter by appointment outcome ID. Choose from the list, or specify an ID.',
 	},
 ];
 
@@ -78,16 +58,20 @@ export async function execute(
 		qs.includeDeleted = true;
 	}
 	if (options.userId) {
-		qs.userId = options.userId;
+		const userIdRaw = (options.userId as IDataObject).value as string;
+		qs.userId = toInt(userIdRaw, 'User ID', this.getNode(), i);
 	}
 	if (options.createdById) {
-		qs.createdById = options.createdById;
+		const createdByIdRaw = (options.createdById as IDataObject).value as string;
+		qs.createdById = toInt(createdByIdRaw, 'Created By ID', this.getNode(), i);
 	}
 	if (options.typeId) {
-		qs.typeId = options.typeId;
+		const typeIdRaw = (options.typeId as IDataObject).value as string;
+		qs.typeId = toInt(typeIdRaw, 'Type ID', this.getNode(), i);
 	}
 	if (options.outcomeId) {
-		qs.outcomeId = options.outcomeId;
+		const outcomeIdRaw = (options.outcomeId as IDataObject).value as string;
+		qs.outcomeId = toInt(outcomeIdRaw, 'Outcome ID', this.getNode(), i);
 	}
 
 	const limit = returnAll ? undefined : (this.getNodeParameter('limit', i) as number);

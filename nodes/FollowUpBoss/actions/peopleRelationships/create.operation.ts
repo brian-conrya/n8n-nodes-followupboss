@@ -1,6 +1,6 @@
-import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,22 +11,13 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Owner ID',
-		name: 'ownerId',
-		type: 'string',
-		default: '',
-		required: true,
-		placeholder: 'e.g. 12345',
-		description: 'ID of the owner person',
+		...getPersonIdProperty(true, 'ownerId'),
+		description: 'ID of the owner person. Choose from the list, or specify an ID.',
 	},
 	{
+		...getPersonIdProperty(true, 'relatedPersonId'),
 		displayName: 'Related Person ID',
-		name: 'relatedPersonId',
-		type: 'string',
-		default: '',
-		required: true,
-		placeholder: 'e.g. 67890',
-		description: 'ID of the related person',
+		description: 'ID of the related person. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Type',
@@ -45,9 +36,9 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const ownerIdRaw = this.getNodeParameter('ownerId', i) as string;
+	const ownerIdRaw = (this.getNodeParameter('ownerId', i) as IDataObject).value as string;
 	const ownerId = toInt(ownerIdRaw, 'Owner ID', this.getNode(), i);
-	const relatedPersonIdRaw = this.getNodeParameter('relatedPersonId', i) as string;
+	const relatedPersonIdRaw = (this.getNodeParameter('relatedPersonId', i) as IDataObject).value as string;
 	const relatedPersonId = toInt(relatedPersonIdRaw, 'Related Person ID', this.getNode(), i);
 	const type = this.getNodeParameter('type', i) as string;
 	const body = { ownerId, relatedPersonId, type };

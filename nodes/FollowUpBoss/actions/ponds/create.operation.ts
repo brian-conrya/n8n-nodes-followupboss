@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getUserIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -20,16 +20,8 @@ const properties: INodeProperties[] = [
 		description: 'Name of the pond',
 	},
 	{
-		displayName: 'Lead Agent Name or ID',
-		name: 'userId',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getUsers',
-		},
-		default: '',
-		required: true,
-		description:
-			'The Pond Lead Agent. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		...getUserIdProperty('Lead Agent', 'userId', true),
+		description: 'The Pond Lead Agent. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'User Names or IDs',
@@ -52,7 +44,8 @@ export async function execute(
 	i: number,
 ): Promise<INodeExecutionData[]> {
 	const name = this.getNodeParameter('name', i) as string;
-	const userId = toInt(this.getNodeParameter('userId', i) as string, 'User ID', this.getNode(), i);
+	const userIdRaw = (this.getNodeParameter('userId', i) as IDataObject).value as string;
+	const userId = toInt(userIdRaw, 'User ID', this.getNode(), i);
 	const userIds = this.getNodeParameter('userIds', i) as number[];
 
 	const body: IDataObject = {

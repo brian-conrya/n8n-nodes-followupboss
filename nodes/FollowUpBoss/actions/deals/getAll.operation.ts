@@ -3,6 +3,9 @@ import { apiRequestAllItems } from '../../transport';
 import {
     addCommonParameters,
     createGetAllOperationDescription,
+    getPersonIdProperty,
+    getPipelineIdProperty,
+    getUserIdProperty,
     toInt,
     wrapData,
 } from '../../helpers/utils';
@@ -23,21 +26,14 @@ const resourceSpecificOptions: INodeProperties[] = [
         description: 'Whether to include deals with a status of Deleted in the results',
     },
     {
-        displayName: 'Person ID',
+        ...getPersonIdProperty(),
         name: 'personId',
-        type: 'string',
-        default: '',
-        description: 'Return a list of deals for a specific person',
+        required: false,
+        description: 'Return a list of deals for a specific person. Choose from the list, or specify an ID.',
     },
     {
-        displayName: 'Pipeline Name or ID',
-        name: 'pipelineId',
-        type: 'options',
-        typeOptions: {
-            loadOptionsMethod: 'getPipelines',
-        },
-        default: '',
-        description: 'Return deals for a specific pipeline only. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+        ...getPipelineIdProperty(false),
+        description: 'Return deals for a specific pipeline only. Choose from the list, or specify an ID.',
     },
     {
         displayName: 'Status',
@@ -52,14 +48,8 @@ const resourceSpecificOptions: INodeProperties[] = [
         description: 'Only return deals with this status',
     },
     {
-        displayName: 'User Name or ID',
-        name: 'userId',
-        type: 'options',
-        typeOptions: {
-            loadOptionsMethod: 'getUsers',
-        },
-        default: '',
-        description: 'Return a list of deals for a specific user. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+        ...getUserIdProperty('User', 'userId', false),
+        description: 'Return a list of deals for a specific user. Choose from the list, or specify an ID.',
     },
 ];
 
@@ -86,16 +76,19 @@ export async function execute(
         qs.includeDeleted = 1;
     }
     if (options.personId) {
-        qs.personId = toInt(options.personId as string, 'Person ID', this.getNode(), i);
+        const personIdRaw = (options.personId as IDataObject).value as string;
+        qs.personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
     }
     if (options.pipelineId) {
-        qs.pipelineId = toInt(options.pipelineId as string, 'Pipeline ID', this.getNode(), i);
+        const pipelineIdRaw = (options.pipelineId as IDataObject).value as string;
+        qs.pipelineId = toInt(pipelineIdRaw, 'Pipeline ID', this.getNode(), i);
     }
     if (options.status) {
         qs.status = options.status;
     }
     if (options.userId) {
-        qs.userId = toInt(options.userId as string, 'User ID', this.getNode(), i);
+        const userIdRaw = (options.userId as IDataObject).value as string;
+        qs.userId = toInt(userIdRaw, 'User ID', this.getNode(), i);
     }
 
     const limit = returnAll ? undefined : (this.getNodeParameter('limit', i) as number);

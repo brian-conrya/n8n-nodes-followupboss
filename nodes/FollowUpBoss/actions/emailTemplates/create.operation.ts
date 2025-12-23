@@ -29,7 +29,7 @@ const properties: INodeProperties[] = [
 		description: 'The email subject used when this email template is selected',
 	},
 	{
-		displayName: 'Body',
+		displayName: 'Body HTML',
 		name: 'body',
 		type: 'string',
 		default: '',
@@ -39,6 +39,7 @@ const properties: INodeProperties[] = [
 		description: 'The HTML body of the email template',
 		typeOptions: {
 			rows: 5,
+			editor: 'htmlEditor',
 		},
 	},
 	{

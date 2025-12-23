@@ -3,6 +3,7 @@ import { apiRequestAllItems } from '../../transport';
 import {
 	addCommonParameters,
 	createGetAllOperationDescription,
+	getPersonIdProperty,
 	toInt,
 	wrapData,
 } from '../../helpers/utils';
@@ -18,11 +19,8 @@ const resourceSpecificOptions: INodeProperties[] = [
 		description: 'Filter calls based on the number that the call was from',
 	},
 	{
-		displayName: 'Person ID',
-		name: 'personId',
-		type: 'string',
-		default: '',
-		description: 'Filter by Person ID',
+		...getPersonIdProperty(false),
+		description: 'Filter by Person ID. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Phone',
@@ -61,7 +59,8 @@ export async function execute(
 	}
 
 	if (options.personId) {
-		qs.personId = toInt(options.personId as string, 'Person ID', this.getNode(), i);
+		const personIdRaw = (options.personId as IDataObject).value as string;
+		qs.personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	}
 
 	if (options.phone) {

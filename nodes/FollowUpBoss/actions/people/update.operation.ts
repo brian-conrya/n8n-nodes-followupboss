@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, toFloat, getPersonIdProperty } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, toFloat, getPersonIdProperty, getLenderIdProperty, getPondIdProperty, getUserIdProperty, getCustomFieldIdProperty, getStageIdProperty, getTimeframeIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -83,37 +83,20 @@ const properties: INodeProperties[] = [
 				],
 			},
 			{
-				displayName: 'Assigned Lender Name or ID',
-				name: 'assignedLenderId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getLenders',
-				},
-				default: '',
+				...getLenderIdProperty('Assigned Lender', 'assignedLenderId', false),
 				description:
-					'Lender assigned to this person. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+					'Lender assigned to this person. Choose from the list, or specify an ID.',
 			},
 			{
-				displayName: 'Assigned Pond Name or ID',
+				...getPondIdProperty(false),
 				name: 'assignedPondId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getPonds',
-				},
-				default: '',
 				description:
-					'Pond assigned to this person. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+					'Pond assigned to this person. Choose from the list, or specify an ID.',
 			},
 			{
-				displayName: 'Assigned User Name or ID',
-				name: 'assignedUserId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getUsers',
-				},
-				default: '',
+				...getUserIdProperty('Assigned User', 'assignedUserId', false),
 				description:
-					'Agent assigned to this person. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+					'Agent assigned to this person. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Background',
@@ -144,16 +127,9 @@ const properties: INodeProperties[] = [
 						displayName: 'Custom Field',
 						values: [
 							{
-								// eslint-disable-next-line n8n-nodes-base/node-param-display-name-wrong-for-dynamic-options
-								displayName: 'Field Label or Name',
-								name: 'key',
-								type: 'options',
-								typeOptions: {
-									loadOptionsMethod: 'getCustomFields',
-								},
-								default: '',
+								...getCustomFieldIdProperty(true, 'key'),
 								description:
-									'Name of the custom field (with or without "custom" prefix). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+									'Name of the custom field (with or without "custom" prefix). Choose from the list, or specify an ID.',
 							},
 							{
 								displayName: 'Value',
@@ -265,15 +241,9 @@ const properties: INodeProperties[] = [
 				description: 'Price of the property',
 			},
 			{
-				displayName: 'Stage Name or ID',
-				name: 'stage',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getStages',
-				},
-				default: '',
+				...getStageIdProperty(false, 'stage'),
 				description:
-					'The stage the person is in. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+					'The stage the person is in. Choose from the list, or specify a stage name.',
 			},
 			{
 				displayName: 'Tags',
@@ -302,15 +272,9 @@ const properties: INodeProperties[] = [
 				],
 			},
 			{
-				displayName: 'Timeframe Name or ID',
-				name: 'timeframeId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getTimeframes',
-				},
-				default: '',
+				...getTimeframeIdProperty(false, 'timeframeId'),
 				description:
-					'Timeframe to move. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+					'Timeframe to move. Choose from the list, or specify an ID.',
 			},
 		],
 	},
@@ -322,7 +286,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const idRaw = this.getNodeParameter('id', i) as string;
+	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Person ID', this.getNode(), i);
 	const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
 

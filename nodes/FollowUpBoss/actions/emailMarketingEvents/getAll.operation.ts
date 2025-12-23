@@ -3,6 +3,7 @@ import { apiRequestAllItems } from '../../transport';
 import {
     addCommonParameters,
     createGetAllOperationDescription,
+    getPersonIdProperty,
     toInt,
     wrapData,
 } from '../../helpers/utils';
@@ -31,11 +32,8 @@ export const description: INodeProperties[] = createGetAllOperationDescription({
             description: 'Find email marketing events based on type',
         },
         {
-            displayName: 'Person ID',
-            name: 'personId',
-            type: 'string',
-            default: '',
-            description: 'Find email marketing events by person ID',
+            ...getPersonIdProperty(false),
+            description: 'Find email marketing events by person ID. Choose from the list, or specify an ID.',
         },
     ],
 });
@@ -53,7 +51,8 @@ export async function execute(
 
     if (options.type) qs.type = options.type;
     if (options.personId) {
-        qs.personId = toInt(options.personId as string, 'Person ID', this.getNode(), i);
+        const personIdRaw = (options.personId as IDataObject).value as string;
+        qs.personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
     }
 
     const limit = returnAll ? undefined : (this.getNodeParameter('limit', i) as number);

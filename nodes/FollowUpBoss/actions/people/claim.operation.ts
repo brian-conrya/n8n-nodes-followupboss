@@ -1,4 +1,4 @@
-import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
 import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty } from '../../helpers/utils';
 
@@ -22,7 +22,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const idRaw = this.getNodeParameter('id', i) as string;
+	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Person ID', this.getNode(), i);
 	const response = await apiRequest.call(this, 'POST', '/people/claim', {}, { id });
 	return wrapData(response);

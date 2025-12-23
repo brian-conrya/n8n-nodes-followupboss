@@ -1,6 +1,6 @@
 import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapDeleteSuccess } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapDeleteSuccess, getPersonAttachmentIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,11 +11,7 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Person Attachment ID',
-		name: 'id',
-		type: 'string',
-		default: '',
-		required: true,
+		...getPersonAttachmentIdProperty(true, 'id'),
 		description: 'ID of the person attachment to delete',
 	},
 ];

@@ -1,6 +1,6 @@
 import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapDeleteSuccess } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapDeleteSuccess, getAppointmentIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,12 +11,8 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Appointment ID',
-		name: 'appointmentId',
-		type: 'string',
-		default: '',
-		required: true,
-		description: 'ID of the appointment to delete',
+		...getAppointmentIdProperty(true),
+		description: 'ID of the appointment to delete. Choose from the list, or specify an ID.',
 	},
 ];
 

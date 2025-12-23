@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getTaskIdProperty } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getTaskIdProperty, getUserIdProperty, getPersonIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -22,15 +22,8 @@ const properties: INodeProperties[] = [
 		default: {},
 		options: [
 			{
-				displayName: 'Assigned User Name or ID',
-				name: 'assignedUser',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getUsers',
-				},
-				default: '',
-				description:
-					'Choose from the list, or specify an ID or Full Name using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				...getUserIdProperty('Assigned User', 'assignedUserId', false),
+				description: 'The user assigned to this task. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Due Date',
@@ -62,11 +55,10 @@ const properties: INodeProperties[] = [
 				description: 'Name of the task',
 			},
 			{
-				displayName: 'Person ID',
+				...getPersonIdProperty(),
 				name: 'personId',
-				type: 'string',
-				default: '',
-				description: 'ID of the person this task is related to',
+				required: false,
+				description: 'ID of the person this task is related to. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Remind Seconds Before',
@@ -131,20 +123,21 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const taskIdRaw = this.getNodeParameter('taskId', index) as string;
+	const taskIdRaw = (this.getNodeParameter('taskId', index) as IDataObject).value as string;
 	const taskId = toInt(taskIdRaw, 'Task ID', this.getNode(), index);
 	const updateFields = this.getNodeParameter('updateFields', index) as IDataObject;
 
 	const body: IDataObject = {};
 
-	if (updateFields.assignedUser) {
-		const assignedUser = updateFields.assignedUser as string | number;
-		if (typeof assignedUser === 'number' || !isNaN(Number(assignedUser))) {
-			body.assignedUserId = assignedUser;
-		} else {
-			body.assignedTo = assignedUser;
-		}
-		delete updateFields.assignedUser;
+	if (updateFields.assignedUserId) {
+		const assignedUserIdRaw = (updateFields.assignedUserId as IDataObject).value as string;
+		body.assignedUserId = toInt(assignedUserIdRaw, 'Assigned User ID', this.getNode(), index);
+		delete updateFields.assignedUserId;
+	}
+	if (updateFields.personId) {
+		const personIdRaw = (updateFields.personId as IDataObject).value as string;
+		body.personId = toInt(personIdRaw, 'Person ID', this.getNode(), index);
+		delete updateFields.personId;
 	}
 
 	Object.assign(body, updateFields);

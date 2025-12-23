@@ -180,90 +180,442 @@ export function getCommonFiltersProperties(): INodeProperties[] {
 	];
 }
 
-export function getPersonIdProperty(): INodeProperties {
-	return {
-		displayName: 'Person',
-		name: 'personId',
-		type: 'resourceLocator',
-		default: { mode: 'list', value: '' },
-		required: true,
-		modes: [
-			{
-				displayName: 'By ID',
-				name: 'id',
-				type: 'string',
-				placeholder: '123',
-				validation: [
+export interface IResourceLocatorOptions {
+	displayName: string;
+	name: string;
+	searchListMethod: string;
+	placeholder?: string;
+	required?: boolean;
+	urlRegex?: string;
+	urlPlaceholder?: string;
+	isNumericId?: boolean;
+	searchable?: boolean;
+}
+
+export function getResourceLocatorProperty(options: IResourceLocatorOptions): INodeProperties {
+	const {
+		displayName,
+		name,
+		searchListMethod,
+		placeholder,
+		required = true,
+		urlRegex,
+		urlPlaceholder,
+		isNumericId = true,
+	} = options;
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const modes: Array<Record<string, any>> = [
+		{
+			displayName: 'By ID',
+			name: 'id',
+			type: 'string',
+			default: '',
+			placeholder: isNumericId ? '123' : 'e.g. Stage Name',
+			validation: isNumericId
+				? [
 					{
 						type: 'regex',
 						properties: {
 							regex: '[0-9]+',
-							errorMessage: 'Not a valid Person ID',
+							errorMessage: `Not a valid ${displayName} ID`,
 						},
 					},
-				],
+				]
+				: [],
+		},
+	];
+
+	if (urlRegex) {
+		modes.push({
+			displayName: 'By URL',
+			name: 'url',
+			type: 'string',
+			default: '',
+			placeholder: urlPlaceholder || 'https://...',
+			extractValue: {
+				type: 'regex',
+				regex: urlRegex,
 			},
-			{
-				displayName: 'By URL',
-				name: 'url',
-				type: 'string',
-				placeholder: 'https://subdomain.followupboss.com/2/people/view/123',
-				extractValue: {
-					type: 'regex',
-					regex: 'https://.*\\.followupboss\\.com/.*people/view/(\\d+)',
-				},
-			},
-			{
-				displayName: 'From list',
-				name: 'list',
-				type: 'list',
-				placeholder: 'Select a person...',
-				typeOptions: {
-					searchListMethod: 'getPeople',
-					searchFilterRequired: true,
-					searchable: true,
-				},
-			},
-		],
+		});
+	}
+
+	modes.push({
+		displayName: 'From list',
+		name: 'list',
+		type: 'list',
+		default: '',
+		placeholder: placeholder || `Select a ${displayName.toLowerCase()}...`,
+		typeOptions: {
+			searchListMethod,
+			searchable: options.searchable ?? true,
+		},
+	});
+
+	return {
+		displayName,
+		name,
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
+		required,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		modes: modes as any,
 	};
 }
 
-export function getTaskIdProperty(): INodeProperties {
-	return {
+export function getPersonIdProperty(required = true, name = 'personId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Person',
+		name,
+		searchListMethod: 'getPeople',
+		urlRegex: 'https://.*\\.followupboss\\.com/.*people/view/(\\d+)',
+		urlPlaceholder: 'https://subdomain.followupboss.com/2/people/view/123',
+		required,
+	});
+}
+
+export function getTaskIdProperty(required = true, name = 'taskId'): INodeProperties {
+	return getResourceLocatorProperty({
 		displayName: 'Task ID',
-		name: 'taskId',
-		type: 'resourceLocator',
-		default: { mode: 'list', value: '' },
-		required: true,
-		modes: [
-			{
-				displayName: 'By ID',
-				name: 'id',
-				type: 'string',
-				placeholder: '123',
-				validation: [
-					{
-						type: 'regex',
-						properties: {
-							regex: '[0-9]+',
-							errorMessage: 'Not a valid Task ID',
-						},
-					},
-				],
-			},
-			{
-				displayName: 'From list',
-				name: 'list',
-				type: 'list',
-				placeholder: 'Select a task...',
-				typeOptions: {
-					searchListMethod: 'getTasks',
-					searchFilterRequired: true,
-					searchable: true,
-				},
-			},
-		],
+		name,
+		searchListMethod: 'getTasks',
+		required,
+	});
+}
+
+export function getUserIdProperty(
+	displayName = 'User',
+	name = 'userId',
+	required = true,
+): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName,
+		name,
+		searchListMethod: 'getUsers',
+		required,
+	});
+}
+
+
+export function getLenderIdProperty(
+	displayName = 'Lender',
+	name = 'lenderId',
+	required = true,
+): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName,
+		name,
+		searchListMethod: 'getLenders',
+		required,
+		searchable: false,
+	});
+}
+
+export function getAgentIdProperty(required = true, name = 'agentId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Agent',
+		name,
+		searchListMethod: 'getAgents',
+		required,
+	});
+}
+
+export function getPipelineIdProperty(required = true, name = 'pipelineId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Pipeline',
+		name,
+		searchListMethod: 'getPipelines',
+		required,
+		searchable: false,
+	});
+}
+
+export function getSmartListIdProperty(required = true, name = 'smartListId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Smart List',
+		name,
+		searchListMethod: 'getSmartLists',
+		required,
+	});
+}
+
+export function getPipelineStageIdProperty(required = true, name = 'stageId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Stage',
+		name,
+		searchListMethod: 'getPipelineStages',
+		required,
+	});
+}
+
+export function getStageIdProperty(required = true, name = 'stage', isNumericId = false): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Stage',
+		name,
+		searchListMethod: 'getStages',
+		required,
+		isNumericId,
+	});
+}
+
+export function getAppointmentTypeIdProperty(required = true, name = 'typeId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Appointment Type',
+		name,
+		searchListMethod: 'getAppointmentTypes',
+		required,
+		searchable: false,
+	});
+}
+
+export function getTimeframeIdProperty(required = true, name = 'timeframeId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Timeframe',
+		name,
+		searchListMethod: 'getTimeframes',
+		required,
+	});
+}
+
+export function getAppointmentOutcomeIdProperty(required = true, name = 'outcomeId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Appointment Outcome',
+		name,
+		searchListMethod: 'getAppointmentOutcomes',
+		required,
+		searchable: false,
+	});
+}
+
+export function getActionPlanIdProperty(required = true, name = 'actionPlanId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Action Plan',
+		name,
+		searchListMethod: 'getActionPlans',
+		required,
+	});
+}
+
+export function getAutomationIdProperty(required = true, name = 'automationId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Automation',
+		name,
+		searchListMethod: 'getAutomations',
+		required,
+	});
+}
+
+export function getPondIdProperty(required = true): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Pond',
+		name: 'pondId',
+		searchListMethod: 'getPonds',
+		required,
+		searchable: false,
+	});
+}
+
+export function getGroupIdProperty(required = true, name = 'groupId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Group',
+		name,
+		searchListMethod: 'getGroups',
+		required,
+		searchable: false,
+	});
+}
+
+export function getDealIdProperty(required = true): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Deal',
+		name: 'dealId',
+		searchListMethod: 'getDeals',
+		required,
+		searchable: false,
+	});
+}
+
+export function getCallIdProperty(required = true, name = 'id'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Call',
+		name,
+		searchListMethod: 'getCalls',
+		required,
+		searchable: false,
+	});
+}
+
+export function getTeamIdProperty(required = true, name = 'teamId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Team',
+		name,
+		searchListMethod: 'getTeams',
+		required,
+		searchable: false,
+	});
+}
+
+export function getEmailTemplateIdProperty(required = true, name = 'templateId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Template',
+		name,
+		searchListMethod: 'getEmailTemplates',
+		required,
+		searchable: false,
+	});
+}
+
+export function getTextMessageTemplateIdProperty(required = true, name = 'templateId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Text Message Template',
+		name,
+		searchListMethod: 'getTextMessageTemplates',
+		required,
+		searchable: false,
+	});
+}
+
+export function getCustomFieldIdProperty(required = true, name = 'name'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Custom Field',
+		name,
+		searchListMethod: 'getCustomFields',
+		isNumericId: false,
+		required,
+		searchable: false,
+	});
+}
+
+export function getDealCustomFieldIdProperty(required = true, name = 'name'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Deal Custom Field',
+		name,
+		searchListMethod: 'getDealCustomFields',
+		isNumericId: false,
+		required,
+		searchable: false,
+	});
+}
+
+export function getNoteIdProperty(required = true, name = 'noteId'): INodeProperties {
+	return {
+		displayName: 'Note ID',
+		name,
+		type: 'string',
+		default: '',
+		required,
 	};
+}
+
+export function getEventIdProperty(required = true, name = 'eventId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Event',
+		name,
+		searchListMethod: 'getEvents',
+		required,
+		searchable: false,
+	});
+}
+
+export function getRelationshipIdProperty(required = true, name = 'relationshipId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Relationship',
+		name,
+		searchListMethod: 'getPeopleRelationships',
+		required,
+		searchable: false,
+	});
+}
+
+export function getTextMessageIdProperty(required = true, name = 'textMessageId'): INodeProperties {
+	return {
+		displayName: 'Text Message ID',
+		name,
+		type: 'string',
+		default: '',
+		required,
+	};
+}
+
+
+export function getReactionIdProperty(required = true, name = 'id'): INodeProperties {
+	return {
+		displayName: 'Reaction ID',
+		name,
+		type: 'string',
+		default: '',
+		required,
+	};
+}
+
+export function getDealAttachmentIdProperty(required = true, name = 'attachmentId'): INodeProperties {
+	return {
+		displayName: 'Attachment ID',
+		name,
+		type: 'string',
+		default: '',
+		required,
+	};
+}
+
+export function getActionPlanPersonAssignmentIdProperty(required = true, name = 'id'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Assignment',
+		name,
+		searchListMethod: 'getActionPlansPeople',
+		required,
+		searchable: false,
+	});
+}
+
+export function getEmailMarketingCampaignIdProperty(required = true, name = 'campaignId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Campaign',
+		name,
+		searchListMethod: 'getEmailMarketingCampaigns',
+		required,
+		searchable: false,
+	});
+}
+
+export function getPersonAttachmentIdProperty(required = true, name = 'id'): INodeProperties {
+	return {
+		displayName: 'Person Attachment ID',
+		name,
+		type: 'string',
+		default: '',
+		required,
+	};
+}
+
+export function getThreadedReplyIdProperty(required = true, name = 'id'): INodeProperties {
+	return {
+		displayName: 'Threaded Reply ID',
+		name,
+		type: 'string',
+		default: '',
+		required,
+	};
+}
+
+export function getAppointmentIdProperty(required = true): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Appointment',
+		name: 'appointmentId',
+		searchListMethod: 'getAppointments',
+		required,
+		searchable: false,
+	});
+}
+
+export function getAutomationPersonAssignmentIdProperty(required = true): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Assignment',
+		name: 'id',
+		searchListMethod: 'getAutomationsPeople',
+		required,
+		searchable: false,
+	});
 }
 
 export function addCommonParameters(

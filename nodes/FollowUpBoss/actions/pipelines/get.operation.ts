@@ -1,6 +1,6 @@
 import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getPipelineIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,16 +11,9 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Pipeline Name or ID',
-		name: 'id',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getPipelines',
-		},
-		default: '',
-		required: true,
+		...getPipelineIdProperty(true, 'id'),
 		description:
-			'ID of the pipeline to retrieve. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'ID of the pipeline to retrieve. Choose from the list, or specify an ID.',
 	},
 ];
 
@@ -30,7 +23,8 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const id = toInt(this.getNodeParameter('id', i) as string, 'ID', this.getNode(), i);
+	const idRaw = this.getNodeParameter('id', i) as string;
+	const id = toInt(idRaw, 'Pipeline ID', this.getNode(), i);
 	const response = await apiRequest.call(this, 'GET', `/pipelines/${id}`);
 	return wrapData(response);
 }

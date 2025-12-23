@@ -1,8 +1,8 @@
 import {
-	type IExecuteFunctions,
-	type INodeExecutionData,
-	type INodeType,
-	type INodeTypeDescription,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeType,
+	INodeTypeDescription,
 	NodeConnectionTypes,
 } from 'n8n-workflow';
 

@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getEmailTemplateIdProperty, getPersonIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,24 +11,17 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Template Name or ID',
-		name: 'id',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getEmailTemplates',
-		},
-		default: '',
-		required: true,
+		...getEmailTemplateIdProperty(true, 'id'),
 		description:
-			'ID of the template to retrieve. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'ID of the template to retrieve. Choose from the list, or specify an ID.',
 	},
 	{
-		displayName: 'Merge Person ID',
+		...getPersonIdProperty(),
+		displayName: 'Merge Person',
 		name: 'mergePersonId',
-		type: 'string',
-		default: '',
+		required: false,
 		description:
-			'When specified, the returned template will have its merge fields filled out with the specified person record and the current user record',
+			'When specified, the returned template will have its merge fields filled out with the specified person record and the current user record. Choose from the list, or specify an ID.',
 	},
 ];
 
@@ -39,11 +32,11 @@ export async function execute(
 	i: number,
 ): Promise<INodeExecutionData[]> {
 	const idRaw = this.getNodeParameter('id', i) as string;
-	const id = toInt(idRaw, 'Template ID', this.getNode(), i);
+	const id = toInt(idRaw, 'Email Template ID', this.getNode(), i);
 	const mergePersonId = this.getNodeParameter('mergePersonId', i) as string;
 	const qs: IDataObject = {};
 	if (mergePersonId) {
-		qs.mergePersonId = toInt(mergePersonId, 'Merge Person ID', this.getNode(), i);
+		qs.mergePersonId = mergePersonId;
 	}
 	const response = await apiRequest.call(this, 'GET', `/templates/${id}`, {}, qs);
 	return wrapData(response);

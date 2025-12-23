@@ -3,6 +3,7 @@ import { apiRequestAllItems } from '../../transport';
 import {
 	addCommonParameters,
 	createGetAllOperationDescription,
+	getPersonIdProperty,
 	toInt,
 	wrapData,
 } from '../../helpers/utils';
@@ -11,11 +12,8 @@ const resource = 'events';
 
 const resourceSpecificOptions: INodeProperties[] = [
 	{
-		displayName: 'Person ID',
-		name: 'personId',
-		type: 'string',
-		default: '',
-		description: 'Find all events related to a person',
+		...getPersonIdProperty(false),
+		description: 'Find all events related to a person. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Type',
@@ -73,7 +71,8 @@ export async function execute(
 	addCommonParameters(options, qs, sort);
 
 	if (options.personId) {
-		qs.personId = toInt(options.personId as string, 'Person ID', this.getNode(), i);
+		const personIdRaw = (options.personId as IDataObject).value as string;
+		qs.personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	}
 	if (options.type && (options.type as string[]).length > 0) {
 		qs.type = (options.type as string[]).join(',');

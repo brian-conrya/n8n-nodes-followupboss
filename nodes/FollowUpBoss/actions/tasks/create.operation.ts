@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty, getUserIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,13 +11,8 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Person ID',
+		...getPersonIdProperty(),
 		name: 'personId',
-		type: 'string',
-		default: '',
-		required: true,
-		placeholder: 'e.g. 12345',
-		description: 'ID of the person to create the task for',
 	},
 	{
 		displayName: 'Name',
@@ -36,15 +31,8 @@ const properties: INodeProperties[] = [
 		default: {},
 		options: [
 			{
-				displayName: 'Assigned User Name or ID',
-				name: 'assignedUser',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getUsers',
-				},
-				default: '',
-				description:
-					'Choose from the list, or specify an ID or Full Name using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				...getUserIdProperty('Assigned User', 'assignedUserId', false),
+				description: 'The user assigned to this task. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Due Date',
@@ -132,7 +120,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const personIdRaw = this.getNodeParameter('personId', index) as string;
+	const personIdRaw = (this.getNodeParameter('personId', index) as IDataObject).value as string;
 	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), index);
 	const name = this.getNodeParameter('name', index) as string;
 	const additionalFields = this.getNodeParameter('additionalFields', index) as IDataObject;
@@ -142,14 +130,10 @@ export async function execute(
 		name,
 	};
 
-	if (additionalFields.assignedUser) {
-		const assignedUser = additionalFields.assignedUser as string | number;
-		if (typeof assignedUser === 'number' || !isNaN(Number(assignedUser))) {
-			body.assignedUserId = assignedUser;
-		} else {
-			body.assignedTo = assignedUser;
-		}
-		delete additionalFields.assignedUser;
+	if (additionalFields.assignedUserId) {
+		const assignedUserIdRaw = (additionalFields.assignedUserId as IDataObject).value as string;
+		body.assignedUserId = toInt(assignedUserIdRaw, 'Assigned User ID', this.getNode(), index);
+		delete additionalFields.assignedUserId;
 	}
 
 	Object.assign(body, additionalFields);

@@ -5,6 +5,8 @@ import {
     createGetAllOperationDescription,
     wrapData,
     toInt,
+    getPersonIdProperty,
+    getAutomationIdProperty,
 } from '../../helpers/utils';
 
 const resource = 'automationsPeople';
@@ -13,21 +15,12 @@ export const description: INodeProperties[] = createGetAllOperationDescription({
     resource,
     resourceSpecificOptions: [
         {
-            displayName: 'Person ID',
-            name: 'personId',
-            type: 'string',
-            default: '',
-            description: 'ID of a Person (i.e. to view only pairings for that Person).',
+            ...getPersonIdProperty(false),
+            description: 'ID of a Person (i.e. to view only pairings for that Person). Choose from the list, or specify an ID.',
         },
         {
-            displayName: 'Automation Name or ID',
-            name: 'automationId',
-            type: 'options',
-            typeOptions: {
-                loadOptionsMethod: 'getAutomations',
-            },
-            default: '',
-            description: 'ID of an Automation (i.e. to view only pairings for that Automation). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+            ...getAutomationIdProperty(false, 'automationId'),
+            description: 'ID of an Automation (i.e. to view only pairings for that Automation). Choose from the list, or specify an ID.',
         },
         {
             displayName: 'Status',
@@ -66,10 +59,12 @@ export async function execute(
     const qs: IDataObject = {};
 
     if (options.personId) {
-        qs.personId = toInt(options.personId as string, 'Person ID', this.getNode(), i);
+        const personIdRaw = (options.personId as IDataObject).value as string;
+        qs.personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
     }
     if (options.automationId) {
-        qs.automationId = toInt(options.automationId as string, 'Automation ID', this.getNode(), i);
+        const automationIdRaw = (options.automationId as IDataObject).value as string;
+        qs.automationId = toInt(automationIdRaw, 'Automation ID', this.getNode(), i);
     }
 
     const sort = this.getNodeParameter('sort', i, {}) as IDataObject;

@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getPipelineIdProperty, getPipelineStageIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,16 +11,9 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Pipeline Name or ID',
+		...getPipelineIdProperty(),
 		name: 'id',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getPipelines',
-		},
-		default: '',
-		required: true,
-		description:
-			'ID of the pipeline to update. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'ID of the pipeline to update. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Description',
@@ -42,7 +35,7 @@ const properties: INodeProperties[] = [
 		displayName: 'Order Weight',
 		name: 'orderWeight',
 		type: 'number',
-		default: '',
+		default: 0,
 		placeholder: '1000',
 		description: 'Set this value to enforce a specific sort order',
 	},
@@ -96,20 +89,14 @@ const properties: INodeProperties[] = [
 						displayName: 'Order Weight',
 						name: 'orderWeight',
 						type: 'number',
-						default: '',
+						default: 0,
 						placeholder: '1000',
 						description: 'Set this value to enforce a specific sort order',
 					},
 					{
-						displayName: 'Stage Name or ID',
+						...getPipelineStageIdProperty(false),
 						name: 'id',
-						type: 'options',
-						typeOptions: {
-							loadOptionsMethod: 'getPipelineStages',
-							loadOptionsDependsOn: ['id'],
-						},
-						default: '',
-						description: 'ID of the stage to update. If not provided, a new stage will be created. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+						description: 'ID of the stage to update. If not provided, a new stage will be created. Choose from the list, or specify an ID.',
 					},
 				],
 			},
@@ -123,7 +110,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const idRaw = this.getNodeParameter('id', i) as string;
+	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Pipeline ID', this.getNode(), i);
 
 	const description = this.getNodeParameter('description', i) as string;
@@ -153,7 +140,8 @@ export async function execute(
 				};
 
 				if (stage.id) {
-					stageObj.id = toInt(stage.id as string, 'Stage ID', this.getNode(), i);
+					const stageIdRaw = (stage.id as IDataObject).value as string;
+					stageObj.id = toInt(stageIdRaw, 'Stage ID', this.getNode(), i);
 				}
 				if (stage.color) {
 					stageObj.color = stage.color;

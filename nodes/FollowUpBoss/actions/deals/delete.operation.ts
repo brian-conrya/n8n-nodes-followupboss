@@ -1,6 +1,6 @@
 import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapDeleteSuccess } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapDeleteSuccess, getDealIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,15 +11,8 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Deal Name or ID',
-		name: 'dealId',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getDeals',
-		},
-		default: '',
-		required: true,
-		description: 'The deal to delete. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		...getDealIdProperty(),
+		description: 'The deal to delete. Choose from the list, or specify an ID.',
 	},
 ];
 

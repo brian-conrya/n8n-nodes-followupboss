@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapDeleteSuccess } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapDeleteSuccess, getTeamIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,16 +11,9 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Team Name or ID',
-		name: 'id',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getTeams',
-		},
-		required: true,
-		default: '',
+		...getTeamIdProperty(true, 'id'),
 		description:
-			'ID of the team to delete. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'ID of the team to delete. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -30,15 +23,10 @@ const properties: INodeProperties[] = [
 		default: {},
 		options: [
 			{
-				displayName: 'Move To Team Name or ID',
-				name: 'moveToTeamId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getTeams',
-				},
-				default: '',
+				...getTeamIdProperty(false, 'moveToTeamId'),
+				displayName: 'Move To Team',
 				description:
-					'If you wish to merge two teams, use this parameter to indicate that all members of the current team should be made a member of the target team before this team is deleted. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+					'ID of the team to move leads to. Choose from the list, or specify an ID.',
 			},
 		],
 	},
@@ -50,12 +38,14 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const id = toInt(this.getNodeParameter('id', i) as string, 'ID', this.getNode(), i);
+	const idRaw = this.getNodeParameter('id', i) as string;
+	const id = toInt(idRaw, 'Team ID', this.getNode(), i);
 	const qs: IDataObject = {};
 	const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
 
 	if (additionalFields.moveToTeamId) {
-		qs.moveToTeamId = additionalFields.moveToTeamId;
+		const moveToTeamIdRaw = (additionalFields.moveToTeamId as IDataObject).value as string;
+		qs.moveToTeamId = toInt(moveToTeamIdRaw, 'Move To Team ID', this.getNode(), i);
 	}
 
 	await apiRequest.call(this, 'DELETE', `/teams/${id}`, {}, qs);

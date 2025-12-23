@@ -3,6 +3,8 @@ import { apiRequestAllItems } from '../../transport';
 import {
 	addCommonParameters,
 	createGetAllOperationDescription,
+	getPersonIdProperty,
+	toInt,
 	wrapData,
 } from '../../helpers/utils';
 
@@ -10,11 +12,8 @@ const resource = 'personAttachments';
 
 const resourceSpecificOptions: INodeProperties[] = [
 	{
-		displayName: 'Person ID',
-		name: 'personId',
-		type: 'string',
-		default: '',
-		description: 'ID of the person to get attachments for',
+		...getPersonIdProperty(false),
+		description: 'ID of the person to get attachments for. Choose from the list, or specify an ID.',
 	},
 ];
 
@@ -35,7 +34,8 @@ export async function execute(
 	addCommonParameters(options, qs, sort);
 
 	if (options.personId) {
-		qs.personId = options.personId;
+		const personIdRaw = (options.personId as IDataObject).value as string;
+		qs.personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	}
 
 	const limit = returnAll ? undefined : (this.getNodeParameter('limit', i) as number);

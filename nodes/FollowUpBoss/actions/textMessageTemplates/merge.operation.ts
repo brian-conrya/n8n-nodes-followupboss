@@ -1,6 +1,6 @@
-import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty, getTextMessageTemplateIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,23 +11,13 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Template Name or ID',
-		name: 'templateId',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getTextMessageTemplates',
-		},
-		default: '',
-		required: true,
+		...getTextMessageTemplateIdProperty(true, 'id'),
 		description:
-			'ID of the template to merge. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'ID of the template to merge. Choose from the list, or specify an ID.',
 	},
 	{
-		displayName: 'Person ID',
-		name: 'personId',
-		type: 'string',
-		default: '',
-		description: 'ID of the person to merge with',
+		...getPersonIdProperty(false),
+		description: 'ID of the person to merge with. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Recipients',
@@ -69,8 +59,10 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const templateId = toInt(this.getNodeParameter('templateId', i) as string, 'Template ID', this.getNode(), i);
-	const personIdRaw = this.getNodeParameter('personId', i) as string;
+	const templateIdRaw = (this.getNodeParameter('templateId', i) as IDataObject).value as string;
+	const templateId = toInt(templateIdRaw, 'Text Message Template ID', this.getNode(), i);
+	const personIdParam = this.getNodeParameter('personId', i, { value: '' }) as IDataObject;
+	const personIdRaw = personIdParam.value as string;
 	const recipients = this.getNodeParameter('recipients', i, {}) as {
 		to?: Array<{ name: string; phone: string }>;
 	};

@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getNoteIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -25,13 +25,8 @@ const properties: INodeProperties[] = [
 		description: 'Type of the reference',
 	},
 	{
-		displayName: 'Reference ID',
-		name: 'refId',
-		type: 'string',
-		default: '',
-		required: true,
-		placeholder: 'e.g. 12345',
-		description: 'ID of the reference object',
+		...getNoteIdProperty(true, 'refId'),
+		description: 'ID of the reference object. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Reaction Type',

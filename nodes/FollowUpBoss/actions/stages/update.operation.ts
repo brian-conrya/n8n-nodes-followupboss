@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getStageIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,16 +11,9 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Stage Name or ID',
-		name: 'id',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getStages',
-		},
-		default: '',
-		required: true,
+		...getStageIdProperty(true, 'id', true),
 		description:
-			'ID of the stage to update. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'ID of the stage to update. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Name',
@@ -44,7 +37,8 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const id = this.getNodeParameter('id', i) as string;
+	const idRaw = this.getNodeParameter('id', i) as string;
+	const id = toInt(idRaw, 'Stage ID', this.getNode(), i);
 	const name = this.getNodeParameter('name', i) as string;
 	const orderWeight = this.getNodeParameter('orderWeight', i) as number;
 	const body: IDataObject = {};

@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty, getAppointmentOutcomeIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,12 +11,11 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Person ID',
+		...getPersonIdProperty(),
+		displayName: 'Person',
 		name: 'personId',
-		type: 'string',
-		default: '',
 		required: true,
-		description: 'ID of the person to create the appointment for',
+		description: 'ID of the person to create the appointment for. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Start Time',
@@ -95,11 +94,11 @@ const properties: INodeProperties[] = [
 								description: 'Email of the invitee',
 							},
 							{
-								displayName: 'Person ID',
+								...getPersonIdProperty(),
+								displayName: 'Person',
 								name: 'personId',
-								type: 'number',
-								default: 0,
-								description: 'ID of the person to invite',
+								required: false,
+								description: 'ID of the person to invite. Choose from the list, or specify an ID.',
 							},
 						],
 					},
@@ -107,15 +106,9 @@ const properties: INodeProperties[] = [
 				description: 'List of people to invite',
 			},
 			{
-				displayName: 'Outcome Name or ID',
-				name: 'outcomeId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getAppointmentOutcomes',
-				},
-				default: '',
+				...getAppointmentOutcomeIdProperty(false, 'outcomeId'),
 				description:
-					'ID of the appointment outcome. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+					'ID of the appointment outcome. Choose from the list, or specify an ID.',
 			},
 		],
 	},
@@ -127,12 +120,16 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const personIdRaw = this.getNodeParameter('personId', index) as string;
+	const personIdRaw = (this.getNodeParameter('personId', index) as IDataObject).value as string;
 	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), index);
 	const start = this.getNodeParameter('start', index) as string;
 	const end = this.getNodeParameter('end', index) as string;
 	const title = this.getNodeParameter('title', index) as string;
 	const additionalFields = this.getNodeParameter('additionalFields', index) as IDataObject;
+
+	if (additionalFields.outcomeId) {
+		additionalFields.outcomeId = (additionalFields.outcomeId as IDataObject).value;
+	}
 
 	const body: IDataObject = {
 		personId,

@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getNoteIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,12 +11,8 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Note ID',
-		name: 'noteId',
-		type: 'string',
-		default: '',
-		required: true,
-		description: 'The ID of the note',
+		...getNoteIdProperty(),
+		description: 'The ID of the note. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Subject',
@@ -32,6 +28,7 @@ const properties: INodeProperties[] = [
 		default: '',
 		description: 'The content of the note',
 		typeOptions: {
+			editor: 'htmlEditor',
 			rows: 5,
 		},
 	},

@@ -1,12 +1,18 @@
 import { IDataObject, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequestAllItems } from '../../transport';
 import {
-    addCommonParameters,
-    createGetAllOperationDescription,
-    wrapData,
-    toFloat,
-    simplifyItems,
-    flattenPersonContactInfo,
+	addCommonParameters,
+	createGetAllOperationDescription,
+	wrapData,
+	toFloat,
+	simplifyItems,
+	flattenPersonContactInfo,
+	getStageIdProperty,
+	getUserIdProperty,
+	getPondIdProperty,
+	getLenderIdProperty,
+	getSmartListIdProperty,
+	getCustomFieldIdProperty,
 } from '../../helpers/utils';
 
 export const description: INodeProperties[] = [
@@ -78,14 +84,8 @@ export const description: INodeProperties[] = [
 				description: 'Search for a person by phone number',
 			},
 			{
-				displayName: 'Stage Name or ID',
-				name: 'stage',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getStages',
-				},
-				default: '',
-				description: 'Search for person by stage name. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				...getStageIdProperty(false, 'stage'),
+				description: 'Search for person by stage name. Choose from the list, or specify a stage name.',
 			},
 			{
 				displayName: 'Source',
@@ -102,24 +102,13 @@ export const description: INodeProperties[] = [
 				description: 'Search for a person by the user that is assigned to them',
 			},
 			{
-				displayName: 'Assigned User Name or ID',
-				name: 'assignedUserId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getUsers',
-				},
-				default: '',
-				description: 'Search for people by the assigned user ID. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				...getUserIdProperty('Assigned User', 'assignedUserId', false),
+				description: 'Search for people by the assigned user ID. Choose from the list, or specify an ID.',
 			},
 			{
-				displayName: 'Assigned Pond Name or ID',
+				...getPondIdProperty(false),
 				name: 'assignedPondId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getPonds',
-				},
-				default: '',
-				description: 'Search for a person by the assigned pond ID. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				description: 'Search for a person by the assigned pond ID. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Assigned Lender Name',
@@ -129,14 +118,8 @@ export const description: INodeProperties[] = [
 				description: 'Search for people by the assigned lender name',
 			},
 			{
-				displayName: 'Assigned Lender Name or ID',
-				name: 'assignedLenderId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getLenders',
-				},
-				default: '',
-				description: 'Search for people by the assigned lender user ID. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				...getLenderIdProperty('Assigned Lender', 'assignedLenderId', false),
+				description: 'Search for people by the assigned lender user ID. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Contacted',
@@ -160,14 +143,8 @@ export const description: INodeProperties[] = [
 				description: 'Search for people who have specified a price below a given value',
 			},
 			{
-				displayName: 'Smart List Name or ID',
-				name: 'smartListId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getSmartLists',
-				},
-				default: '',
-				description: 'Search for people that match a smart list with given ID. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				...getSmartListIdProperty(false, 'smartListId'),
+				description: 'Search for people that match a smart list with given ID. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Tags',
@@ -191,15 +168,8 @@ export const description: INodeProperties[] = [
 						name: 'customField',
 						values: [
 							{
-								// eslint-disable-next-line n8n-nodes-base/node-param-display-name-wrong-for-dynamic-options
-								displayName: 'Field Label or Name',
-								name: 'key',
-								type: 'options',
-								typeOptions: {
-									loadOptionsMethod: 'getCustomFields',
-								},
-								default: '',
-								description: 'Name of the custom field (with or without "custom" prefix). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+								...getCustomFieldIdProperty(true, 'key'),
+								description: 'Name of the custom field (with or without "custom" prefix). Choose from the list, or specify an ID.',
 							},
 							{
 								displayName: 'Value',
@@ -230,65 +200,65 @@ export const description: INodeProperties[] = [
 ];
 
 export async function execute(
-    this: IExecuteFunctions,
-    i: number,
+	this: IExecuteFunctions,
+	i: number,
 ): Promise<INodeExecutionData[]> {
-    const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-    const options = this.getNodeParameter('options', i, {}) as IDataObject;
-    const simplify = this.getNodeParameter('simplify', i) as boolean;
-    const qs: IDataObject = { fields: 'allFields' };
-    const sort = this.getNodeParameter('sort', i, {}) as IDataObject;
+	const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+	const options = this.getNodeParameter('options', i, {}) as IDataObject;
+	const simplify = this.getNodeParameter('simplify', i) as boolean;
+	const qs: IDataObject = { fields: 'allFields' };
+	const sort = this.getNodeParameter('sort', i, {}) as IDataObject;
 
-    addCommonParameters(options, qs, sort);
+	addCommonParameters(options, qs, sort);
 
-    if (options.includeTrash) qs.includeTrash = options.includeTrash;
-    if (options.includeUnclaimed) qs.includeUnclaimed = options.includeUnclaimed;
-    if (options.lastActivityAfter) qs.lastActivityAfter = options.lastActivityAfter;
-    if (options.lastActivityBefore) qs.lastActivityBefore = options.lastActivityBefore;
-    if (options.name) qs.name = options.name;
-    if (options.firstName) qs.firstName = options.firstName;
-    if (options.lastName) qs.lastName = options.lastName;
-    if (options.email) qs.email = options.email;
-    if (options.phone) qs.phone = options.phone;
-    if (options.stage) qs.stage = options.stage;
-    if (options.source) qs.source = options.source;
-    if (options.assignedTo) qs.assignedTo = options.assignedTo;
-    if (options.assignedUserId) qs.assignedUserId = options.assignedUserId;
-    if (options.assignedPondId) qs.assignedPondId = options.assignedPondId;
-    if (options.assignedLenderName) qs.assignedLenderName = options.assignedLenderName;
-    if (options.assignedLenderId) qs.assignedLenderId = options.assignedLenderId;
-    if (options.contacted !== undefined) qs.contacted = options.contacted;
-    if (options.priceAbove) qs.priceAbove = toFloat(options.priceAbove as string, 'Price Above', this.getNode(), i);
-    if (options.priceBelow) qs.priceBelow = toFloat(options.priceBelow as string, 'Price Below', this.getNode(), i);
-    if (options.smartListId) qs.smartListId = options.smartListId;
-    if (options.tags) qs.tags = options.tags;
+	if (options.includeTrash) qs.includeTrash = options.includeTrash;
+	if (options.includeUnclaimed) qs.includeUnclaimed = options.includeUnclaimed;
+	if (options.lastActivityAfter) qs.lastActivityAfter = options.lastActivityAfter;
+	if (options.lastActivityBefore) qs.lastActivityBefore = options.lastActivityBefore;
+	if (options.name) qs.name = options.name;
+	if (options.firstName) qs.firstName = options.firstName;
+	if (options.lastName) qs.lastName = options.lastName;
+	if (options.email) qs.email = options.email;
+	if (options.phone) qs.phone = options.phone;
+	if (options.stage) qs.stage = options.stage;
+	if (options.source) qs.source = options.source;
+	if (options.assignedTo) qs.assignedTo = options.assignedTo;
+	if (options.assignedUserId) qs.assignedUserId = options.assignedUserId;
+	if (options.assignedPondId) qs.assignedPondId = options.assignedPondId;
+	if (options.assignedLenderName) qs.assignedLenderName = options.assignedLenderName;
+	if (options.assignedLenderId) qs.assignedLenderId = options.assignedLenderId;
+	if (options.contacted !== undefined) qs.contacted = options.contacted;
+	if (options.priceAbove) qs.priceAbove = toFloat(options.priceAbove as string, 'Price Above', this.getNode(), i);
+	if (options.priceBelow) qs.priceBelow = toFloat(options.priceBelow as string, 'Price Below', this.getNode(), i);
+	if (options.smartListId) qs.smartListId = options.smartListId;
+	if (options.tags) qs.tags = options.tags;
 
-    // Handle custom fields
-    if (options.customFields) {
-        const customFields = (options.customFields as IDataObject).customField as IDataObject[];
-        if (customFields) {
-            for (const field of customFields) {
-                let key = field.key as string;
-                if (!key.startsWith('custom')) {
-                    key = `custom${key.charAt(0).toUpperCase() + key.slice(1)}`;
-                }
-                qs[key] = field.value;
-            }
-        }
-    }
+	// Handle custom fields
+	if (options.customFields) {
+		const customFields = (options.customFields as IDataObject).customField as IDataObject[];
+		if (customFields) {
+			for (const field of customFields) {
+				let key = field.key as string;
+				if (!key.startsWith('custom')) {
+					key = `custom${key.charAt(0).toUpperCase() + key.slice(1)}`;
+				}
+				qs[key] = field.value;
+			}
+		}
+	}
 
-    const limit = returnAll ? undefined : (this.getNodeParameter('limit', i) as number);
-    const response = await apiRequestAllItems.call(this, '/people', qs, limit);
+	const limit = returnAll ? undefined : (this.getNodeParameter('limit', i) as number);
+	const response = await apiRequestAllItems.call(this, '/people', qs, limit);
 
-    if (simplify) {
-        const transformedData = response.map((item: IDataObject) => flattenPersonContactInfo(item));
+	if (simplify) {
+		const transformedData = response.map((item: IDataObject) => flattenPersonContactInfo(item));
 
-        const simplifiedData = simplifyItems(
-            transformedData,
-            'id,firstName,lastName,email,phone,stage,tags,source,created,updated'.split(','),
-        );
-        return wrapData(simplifiedData);
-    }
+		const simplifiedData = simplifyItems(
+			transformedData,
+			'id,firstName,lastName,email,phone,stage,tags,source,created,updated'.split(','),
+		);
+		return wrapData(simplifiedData);
+	}
 
-    return wrapData(response);
+	return wrapData(response);
 }

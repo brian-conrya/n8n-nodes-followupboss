@@ -3,6 +3,7 @@ import { apiRequestAllItems } from '../../transport';
 import {
 	addCommonParameters,
 	createGetAllOperationDescription,
+	getPersonIdProperty,
 	toInt,
 	wrapData,
 } from '../../helpers/utils';
@@ -13,11 +14,8 @@ export const description: INodeProperties[] = createGetAllOperationDescription({
 	resource,
 	resourceSpecificOptions: [
 		{
-			displayName: 'Person ID',
-			name: 'personId',
-			type: 'string',
-			default: '',
-			description: 'Filter text messages for a specific person ID only',
+			...getPersonIdProperty(false),
+			description: 'Filter text messages for a specific person ID only. Choose from the list, or specify an ID.',
 		},
 		{
 			displayName: 'To Number',
@@ -52,7 +50,8 @@ export async function execute(
 	}
 
 	if (options.personId) {
-		qs.personId = toInt(options.personId as string, 'Person ID', this.getNode(), i);
+		const personIdRaw = (options.personId as IDataObject).value as string;
+		qs.personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	}
 	if (options.toNumber) {
 		qs.toNumber = options.toNumber;

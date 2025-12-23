@@ -1,6 +1,6 @@
 import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapDeleteSuccess } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapDeleteSuccess, getNoteIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,12 +11,8 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Note ID',
-		name: 'noteId',
-		type: 'string',
-		default: '',
-		required: true,
-		description: 'ID of the note to delete',
+		...getNoteIdProperty(),
+		description: 'ID of the note to delete. Choose from the list, or specify an ID.',
 	},
 ];
 

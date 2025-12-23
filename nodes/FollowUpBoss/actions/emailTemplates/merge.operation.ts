@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getEmailTemplateIdProperty, getPersonIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,22 +11,15 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Template Name or ID',
-		name: 'templateId',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getEmailTemplates',
-		},
-		default: '',
-		description:
-			'ID of the template to merge. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		...getEmailTemplateIdProperty(),
+		description: 'ID of the template to merge. Choose from the list, or specify an ID.',
 	},
 	{
-		displayName: 'Merge Person ID',
+		...getPersonIdProperty(),
+		displayName: 'Merge Person',
 		name: 'mergePersonId',
-		type: 'string',
-		default: '',
-		description: 'Person ID to use for merge fields like %contact_name%',
+		required: false,
+		description: 'Person ID to use for merge fields like %contact_name%. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Recipients',
@@ -66,17 +59,15 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const templateId = this.getNodeParameter('templateId', i) as string;
-	const mergePersonId = this.getNodeParameter('mergePersonId', i) as string;
+	const templateIdRaw = (this.getNodeParameter('templateId', i) as IDataObject).value as string;
+	const templateId = toInt(templateIdRaw, 'Email Template ID', this.getNode(), i);
+	const mergePersonIdRaw = (this.getNodeParameter('mergePersonId', i, { value: '' }) as IDataObject).value as string;
 	const recipients = this.getNodeParameter('recipients', i) as IDataObject;
 
 	const body: IDataObject = { templateId };
 
-	if (templateId) {
-		body.templateId = toInt(templateId, 'Template ID', this.getNode(), i);
-	}
-	if (mergePersonId) {
-		body.mergePersonId = toInt(mergePersonId, 'Merge Person ID', this.getNode(), i);
+	if (mergePersonIdRaw) {
+		body.mergePersonId = toInt(mergePersonIdRaw, 'Merge Person ID', this.getNode(), i);
 	}
 
 	if (recipients && recipients.to) {

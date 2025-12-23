@@ -1,6 +1,6 @@
 import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getTextMessageIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,12 +11,8 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Text Message ID',
-		name: 'textMessageId',
-		type: 'string',
-		required: true,
-		default: '',
-		description: 'ID of the text message to retrieve',
+		...getTextMessageIdProperty(),
+		description: 'ID of the text message to retrieve. Choose from the list, or specify an ID.',
 	},
 ];
 

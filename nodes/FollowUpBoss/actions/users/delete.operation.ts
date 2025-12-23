@@ -1,29 +1,15 @@
-import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapDeleteSuccess } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapDeleteSuccess, getUserIdProperty } from '../../helpers/utils';
 
 const properties: INodeProperties[] = [
     {
-        displayName: 'User Name or ID',
-        name: 'id',
-        type: 'options',
-        default: '',
-        required: true,
-        typeOptions: {
-            loadOptionsMethod: 'getUsers',
-        },
-        description: 'The user to delete. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+        ...getUserIdProperty('User', 'id', true),
+        description: 'The user to delete. Choose from the list, or specify an ID.',
     },
     {
-        displayName: 'Assign To Name or ID',
-        name: 'assignTo',
-        type: 'options',
-        default: '',
-        required: true,
-        typeOptions: {
-            loadOptionsMethod: 'getUsers',
-        },
-        description: 'Another user to reassign the deleted user\'s leads to. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+        ...getUserIdProperty('Assign To', 'assignTo', true),
+        description: 'Another user to reassign the deleted user\'s leads to. Choose from the list, or specify an ID.',
     },
 ];
 
@@ -40,7 +26,10 @@ export async function execute(
     this: IExecuteFunctions,
     i: number,
 ): Promise<INodeExecutionData[]> {
-    const id = toInt(this.getNodeParameter('id', i) as string, 'ID', this.getNode(), i); const assignTo = toInt(this.getNodeParameter('assignTo', i) as string, 'Assign To', this.getNode(), i);
+    const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
+    const id = toInt(idRaw, 'User ID', this.getNode(), i);
+    const assignToRaw = (this.getNodeParameter('assignTo', i) as IDataObject).value as string;
+    const assignTo = toInt(assignToRaw, 'Assign To User ID', this.getNode(), i);
     const qs = { assignTo: assignTo };
     await apiRequest.call(this, 'DELETE', `/users/${id}`, {}, qs);
     return wrapDeleteSuccess();

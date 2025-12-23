@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty, getAgentIdProperty, getLenderIdProperty, getGroupIdProperty, getPondIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -50,72 +50,44 @@ const properties: INodeProperties[] = [
 		description: 'What type of assignment to perform',
 	},
 	{
-		displayName: 'Agent Name or ID',
-		name: 'agentId',
-		type: 'options',
-		default: '',
-		required: true,
-		typeOptions: {
-			loadOptionsMethod: 'getAgents',
-		},
+		...getAgentIdProperty(true, 'agentId'),
 		displayOptions: {
 			show: {
 				assignmentType: ['assignAgent'],
 			},
 		},
 		description:
-			'The agent to assign. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'The agent to assign. Choose from the list, or specify an ID.',
 	},
 	{
-		displayName: 'Lender Name or ID',
-		name: 'lenderId',
-		type: 'options',
-		default: '',
-		required: true,
-		typeOptions: {
-			loadOptionsMethod: 'getLenders',
-		},
+		...getLenderIdProperty('Lender', 'lenderId', true),
 		displayOptions: {
 			show: {
 				assignmentType: ['assignLender'],
 			},
 		},
 		description:
-			'The lender to assign. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'The lender to assign. Choose from the list, or specify an ID.',
 	},
 	{
-		displayName: 'Group Name or ID',
-		name: 'groupId',
-		type: 'options',
-		default: '',
-		required: true,
-		typeOptions: {
-			loadOptionsMethod: 'getGroups',
-		},
+		...getGroupIdProperty(true),
 		displayOptions: {
 			show: {
 				assignmentType: ['assignGroup'],
 			},
 		},
 		description:
-			'The group to assign. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'The group to assign. Choose from the list, or specify an ID.',
 	},
 	{
-		displayName: 'Pond Name or ID',
-		name: 'pondId',
-		type: 'options',
-		default: '',
-		required: true,
-		typeOptions: {
-			loadOptionsMethod: 'getPonds',
-		},
+		...getPondIdProperty(true),
 		displayOptions: {
 			show: {
 				assignmentType: ['assignPond'],
 			},
 		},
 		description:
-			'The pond to assign. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'The pond to assign. Choose from the list, or specify an ID.',
 	},
 ];
 
@@ -125,26 +97,22 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const personIdRaw = this.getNodeParameter('personId', i) as string;
+	const personIdRaw = (this.getNodeParameter('personId', i) as IDataObject).value as string;
 	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	const assignmentType = this.getNodeParameter('assignmentType', i) as string;
 
 	const body: IDataObject = {};
 
 	if (assignmentType === 'assignAgent') {
-		const agentIdRaw = this.getNodeParameter('agentId', i) as string;
-		body.assignedUserId = toInt(agentIdRaw, 'Agent ID', this.getNode(), i);
+		body.assignedUserId = (this.getNodeParameter('agentId', i) as IDataObject).value as string;
 	} else if (assignmentType === 'assignLender') {
-		const lenderIdRaw = this.getNodeParameter('lenderId', i) as string;
-		body.assignedLenderId = toInt(lenderIdRaw, 'Lender ID', this.getNode(), i);
+		body.assignedLenderId = (this.getNodeParameter('lenderId', i) as IDataObject).value as string;
 	} else if (assignmentType === 'removeLender') {
 		body.assignedLenderId = null;
 	} else if (assignmentType === 'assignGroup') {
-		const groupIdRaw = this.getNodeParameter('groupId', i) as string;
-		body.groupId = toInt(groupIdRaw, 'Group ID', this.getNode(), i);
+		body.groupId = (this.getNodeParameter('groupId', i) as IDataObject).value as string;
 	} else if (assignmentType === 'assignPond') {
-		const pondIdRaw = this.getNodeParameter('pondId', i) as string;
-		body.pondId = toInt(pondIdRaw, 'Pond ID', this.getNode(), i);
+		body.pondId = (this.getNodeParameter('pondId', i) as IDataObject).value as string;
 	}
 
 	const response = await apiRequest.call(this, 'PUT', `/people/${personId}`, body);

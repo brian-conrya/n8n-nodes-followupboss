@@ -3,6 +3,8 @@ import { apiRequestAllItems } from '../../transport';
 import {
 	addCommonParameters,
 	createGetAllOperationDescription,
+	getPersonIdProperty,
+	getUserIdProperty,
 	toInt,
 	wrapData,
 } from '../../helpers/utils';
@@ -11,15 +13,8 @@ const resource = 'tasks';
 
 const resourceSpecificOptions: INodeProperties[] = [
 	{
-		displayName: 'Assigned User Name or ID',
-		name: 'assignedUser',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getUsers',
-		},
-		default: '',
-		description:
-			'Choose from the list, or specify an ID or Full Name using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		...getUserIdProperty('Assigned User', 'assignedUserId', false),
+		description: 'Filter by assigned user. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Due',
@@ -71,11 +66,10 @@ const resourceSpecificOptions: INodeProperties[] = [
 		description: 'Find tasks where the name is like what you pass in',
 	},
 	{
-		displayName: 'Person ID',
+		...getPersonIdProperty(),
 		name: 'personId',
-		type: 'string',
-		default: '',
-		description: 'Find tasks by a person\'s ID',
+		required: false,
+		description: 'Find tasks by a person\'s ID. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Type',
@@ -140,13 +134,9 @@ export async function execute(
 	const sort = this.getNodeParameter('sort', i, {}) as IDataObject;
 	addCommonParameters(options, qs, sort);
 
-	if (options.assignedUser) {
-		const assignedUser = options.assignedUser as string | number;
-		if (typeof assignedUser === 'number' || !isNaN(Number(assignedUser))) {
-			qs.assignedUserId = assignedUser;
-		} else {
-			qs.assignedTo = assignedUser;
-		}
+	if (options.assignedUserId) {
+		const assignedUserIdRaw = (options.assignedUserId as IDataObject).value as string;
+		qs.assignedUserId = toInt(assignedUserIdRaw, 'Assigned User ID', this.getNode(), i);
 	}
 	if (options.due) {
 		qs.due = options.due;
@@ -164,7 +154,8 @@ export async function execute(
 		qs.name = options.name;
 	}
 	if (options.personId) {
-		qs.personId = toInt(options.personId as string, 'Person ID', this.getNode(), i);
+		const personIdRaw = (options.personId as IDataObject).value as string;
+		qs.personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	}
 	if (options.type) {
 		qs.type = (options.type as string[]).join(',');

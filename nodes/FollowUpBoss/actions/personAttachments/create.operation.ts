@@ -1,7 +1,6 @@
-import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
-import type { IDataObject } from 'n8n-workflow';
+import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -12,13 +11,8 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Person ID',
-		name: 'personId',
-		type: 'string',
-		default: '',
-		required: true,
-		placeholder: 'e.g. 12345',
-		description: 'ID of the person',
+		...getPersonIdProperty(),
+		description: 'ID of the person. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'URL',
@@ -45,7 +39,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const personIdRaw = this.getNodeParameter('personId', i) as string;
+	const personIdRaw = (this.getNodeParameter('personId', i) as IDataObject).value as string;
 	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	const url = this.getNodeParameter('url', i) as string;
 	const name = this.getNodeParameter('name', i) as string;

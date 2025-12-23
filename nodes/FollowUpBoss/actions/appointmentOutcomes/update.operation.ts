@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { updateDisplayOptions, wrapData, getAppointmentOutcomeIdProperty, toInt } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,16 +11,9 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Appointment Outcome Name or ID',
-		name: 'id',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getAppointmentOutcomes',
-		},
-		default: '',
-		required: true,
+		...getAppointmentOutcomeIdProperty(true, 'id'),
 		description:
-			'ID of the appointment outcome to update. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'ID of the appointment outcome to update. Choose from the list, or specify an ID.',
 	},
 
 	{

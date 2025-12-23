@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty, getUserIdProperty, getEmailMarketingCampaignIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,12 +11,8 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Campaign ID',
-		name: 'campaignId',
-		type: 'string',
-		default: '',
-		required: true,
-		description: 'ID of the email campaign this event belongs to',
+		...getEmailMarketingCampaignIdProperty(),
+		description: 'ID of the email campaign this event belongs to. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Event Type',
@@ -60,11 +56,10 @@ const properties: INodeProperties[] = [
 				description: 'Date/time of the event',
 			},
 			{
-				displayName: 'Person ID',
+				...getPersonIdProperty(),
 				name: 'personId',
-				type: 'string',
-				default: '',
-				description: 'ID of the recipient',
+				required: false,
+				description: 'ID of the recipient. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'URL',
@@ -74,15 +69,8 @@ const properties: INodeProperties[] = [
 				description: 'URL for the campaign',
 			},
 			{
-				displayName: 'User Name or ID',
-				name: 'userId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getUsers',
-				},
-				default: '',
-				description:
-					'Follow Up Boss user ID from whom the email was sent. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				...getUserIdProperty('User', 'userId', false),
+				description: 'Follow Up Boss user ID from whom the email was sent. Choose from the list, or specify an ID.',
 			},
 		],
 	},
@@ -94,7 +82,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const campaignIdRaw = this.getNodeParameter('campaignId', i) as string;
+	const campaignIdRaw = (this.getNodeParameter('campaignId', i) as IDataObject).value as string;
 	const campaignId = toInt(campaignIdRaw, 'Campaign ID', this.getNode(), i);
 	const eventType = this.getNodeParameter('eventType', i) as string;
 	const recipient = this.getNodeParameter('recipient', i) as string;
@@ -109,11 +97,13 @@ export async function execute(
 
 	// Handle personId if provided
 	if (additionalFields.personId) {
-		eventObject.personId = toInt(additionalFields.personId as string, 'Person ID', this.getNode(), i);
+		const personIdRaw = (additionalFields.personId as IDataObject).value as string;
+		eventObject.personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	}
 
-	if (eventObject.userId) {
-		eventObject.userId = toInt(eventObject.userId as string, 'User ID', this.getNode(), i);
+	if (additionalFields.userId) {
+		const userIdRaw = (additionalFields.userId as IDataObject).value as string;
+		eventObject.userId = toInt(userIdRaw, 'User ID', this.getNode(), i);
 	}
 
 	const body = {

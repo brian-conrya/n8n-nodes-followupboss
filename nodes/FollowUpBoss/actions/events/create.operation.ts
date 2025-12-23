@@ -1,6 +1,6 @@
 import { IExecuteFunctions, INodeExecutionData, INodeProperties, IDataObject, IDisplayOptions } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toFloat, toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toFloat, toInt, updateDisplayOptions, wrapData, getLenderIdProperty, getUserIdProperty, getPersonIdProperty, getCustomFieldIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -180,7 +180,111 @@ const properties: INodeProperties[] = [
 			{
 				displayName: 'Person Details',
 				name: 'personDetails',
+				// eslint-disable-next-line n8n-nodes-base/node-param-fixed-collection-type-unsorted-items
 				values: [
+					{
+						displayName: 'First Name',
+						name: 'firstName',
+						type: 'string',
+						default: '',
+						placeholder: 'Melissa',
+					},
+					{
+						displayName: 'Last Name',
+						name: 'lastName',
+						type: 'string',
+						default: '',
+						placeholder: 'Hartman',
+					},
+					{
+						displayName: 'Emails',
+						name: 'emails',
+						type: 'fixedCollection',
+						default: {},
+						placeholder: 'Add Email',
+						options: [
+							{
+								displayName: 'Email',
+								name: 'email',
+								values: [
+									{
+										displayName: 'Value',
+										name: 'value',
+										type: 'string',
+										default: '',
+										placeholder: 'm.hartman@example.com',
+									},
+									{
+										displayName: 'Type',
+										name: 'type',
+										type: 'string',
+										default: '',
+										placeholder: 'home',
+									},
+								]
+							},
+						]
+					},
+					{
+						displayName: 'Phones',
+						name: 'phones',
+						type: 'fixedCollection',
+						default: {},
+						placeholder: 'Add Phone',
+						options: [
+							{
+								displayName: 'Phone',
+								name: 'phone',
+								values: [
+									{
+										displayName: 'Value',
+										name: 'value',
+										type: 'string',
+										default: '',
+										placeholder: '(555) 555-1234',
+									},
+									{
+										displayName: 'Type',
+										name: 'type',
+										type: 'string',
+										default: '',
+										placeholder: 'mobile',
+									},
+								]
+							},
+						]
+					},
+					{
+						displayName: 'Stage',
+						name: 'stage',
+						type: 'string',
+						default: '',
+						placeholder: 'Lead',
+						description: 'The stage of the person. (e.g., Lead or Trash See stages API endpoint for more options.).',
+					},
+					{
+						displayName: 'Source',
+						name: 'source',
+						type: 'string',
+						default: '',
+						placeholder: 'Zillow',
+						description: 'The source of the lead',
+					},
+					{
+						displayName: 'Source URL',
+						name: 'sourceUrl',
+						type: 'string',
+						default: '',
+						placeholder: 'http://click.email.zillow.com/?qs=1e120cec11e3',
+					},
+					{
+						displayName: 'Price',
+						name: 'price',
+						type: 'string',
+						default: '',
+						placeholder: '250000',
+						description: 'The estimated sell/buy price for this person',
+					},
 					{
 						displayName: 'Addresses',
 						name: 'addresses',
@@ -192,13 +296,6 @@ const properties: INodeProperties[] = [
 								displayName: 'Address',
 								name: 'address',
 								values: [
-									{
-										displayName: 'Type',
-										name: 'type',
-										type: 'string',
-										default: '',
-										placeholder: 'home',
-									},
 									{
 										displayName: 'Street',
 										name: 'street',
@@ -234,89 +331,6 @@ const properties: INodeProperties[] = [
 										default: '',
 										placeholder: 'United States',
 									},
-								]
-							},
-						]
-					},
-					{
-						displayName: 'Assigned Lender Name',
-						name: 'assignedLenderName',
-						type: 'string',
-						default: '',
-					},
-					{
-						displayName: 'Assigned Lender Name or ID',
-						name: 'assignedLenderId',
-						type: 'options',
-						default: '',
-						description: 'Lender assigned to this person. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-					},
-					{
-						displayName: 'Assigned To',
-						name: 'assignedTo',
-						type: 'string',
-						default: '',
-						description: 'Full name of the agent to assign to this person',
-					},
-					{
-						displayName: 'Assigned User Name or ID',
-						name: 'assignedUserId',
-						type: 'options',
-						default: '',
-						description: 'Agent assigned to this person. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-					},
-					{
-						displayName: 'Contacted',
-						name: 'contacted',
-						type: 'boolean',
-						default: false,
-					},
-					{
-						displayName: 'Custom Fields',
-						name: 'customFields',
-						type: 'fixedCollection',
-						default: {},
-						placeholder: 'Add Custom Field',
-						options: [
-							{
-								displayName: 'Custom Field',
-								name: 'customField',
-								values: [
-									{
-										displayName: 'Name',
-										name: 'name',
-										type: 'string',
-										default: '',
-										description: 'Name of the custom field, prefixed with \'custom\'. E.g. \'customClosingDate\'',
-									},
-									{
-										displayName: 'Value',
-										name: 'value',
-										type: 'string',
-										default: '',
-									},
-								]
-							},
-						]
-					},
-					{
-						displayName: 'Emails',
-						name: 'emails',
-						type: 'fixedCollection',
-						default: {},
-						placeholder: 'Add Email',
-						options: [
-							{
-								displayName: 'Email',
-								name: 'email',
-								values: [
-									{
-										displayName: 'Value',
-										name: 'value',
-										type: 'string',
-										default: '',
-										placeholder: 'm.hartman@example.com',
-									},
 									{
 										displayName: 'Type',
 										name: 'type',
@@ -327,88 +341,6 @@ const properties: INodeProperties[] = [
 								]
 							},
 						]
-					},
-					{
-						displayName: 'First Name',
-						name: 'firstName',
-						type: 'string',
-						default: '',
-						placeholder: 'Melissa',
-					},
-					{
-						displayName: 'ID',
-						name: 'id',
-						type: 'string',
-						default: '',
-						placeholder: '1234',
-						description: 'The ID of the person the event corresponds to',
-					},
-					{
-						displayName: 'Last Name',
-						name: 'lastName',
-						type: 'string',
-						default: '',
-						placeholder: 'Hartman',
-					},
-					{
-						displayName: 'Phones',
-						name: 'phones',
-						type: 'fixedCollection',
-						default: {},
-						placeholder: 'Add Phone',
-						options: [
-							{
-								displayName: 'Phone',
-								name: 'phone',
-								values: [
-									{
-										displayName: 'Value',
-										name: 'value',
-										type: 'string',
-										default: '',
-										placeholder: '(555) 555-1234',
-									},
-									{
-										displayName: 'Type',
-										name: 'type',
-										type: 'string',
-										default: '',
-										placeholder: 'mobile',
-									},
-								]
-							},
-						]
-					},
-					{
-						displayName: 'Price',
-						name: 'price',
-						type: 'string',
-						default: '',
-						placeholder: '250000',
-						description: 'The estimated sell/buy price for this person',
-					},
-					{
-						displayName: 'Source',
-						name: 'source',
-						type: 'string',
-						default: '',
-						placeholder: 'Zillow',
-						description: 'The source of the lead',
-					},
-					{
-						displayName: 'Source URL',
-						name: 'sourceUrl',
-						type: 'string',
-						default: '',
-						placeholder: 'http://click.email.zillow.com/?qs=1e120cec11e3',
-					},
-					{
-						displayName: 'Stage',
-						name: 'stage',
-						type: 'string',
-						default: '',
-						placeholder: 'Lead',
-						description: 'The stage of the person. (e.g., Lead or Trash See stages API endpoint for more options.).',
 					},
 					{
 						displayName: 'Tags',
@@ -434,7 +366,62 @@ const properties: INodeProperties[] = [
 								],
 							},
 						],
-					},],
+					},
+					{
+						displayName: 'Assigned To',
+						name: 'assignedTo',
+						type: 'string',
+						default: '',
+						description: 'Full name of the agent to assign to this person',
+					},
+					{
+						...getUserIdProperty('Assigned User Name or ID', 'assignedUserId', false),
+						description: 'Agent assigned to this person. Choose from the list, or specify an ID.',
+					},
+					{
+						displayName: 'Assigned Lender Name',
+						name: 'assignedLenderName',
+						type: 'string',
+						default: '',
+					},
+					{
+						...getLenderIdProperty('Assigned Lender Name or ID', 'assignedLenderId', false),
+						description: 'Lender assigned to this person. Choose from the list, or specify an ID.',
+					},
+					{
+						displayName: 'Contacted',
+						name: 'contacted',
+						type: 'boolean',
+						default: false,
+					},
+					{
+						displayName: 'Custom Fields',
+						name: 'customFields',
+						type: 'fixedCollection',
+						default: {},
+						placeholder: 'Add Custom Field',
+						options: [
+							{
+								displayName: 'Custom Field',
+								name: 'customField',
+								values: [
+									getCustomFieldIdProperty(),
+									{
+										displayName: 'Value',
+										name: 'value',
+										type: 'string',
+										default: '',
+									},
+								]
+							},
+						]
+					},
+					{
+						...getPersonIdProperty(false, 'id'),
+						displayName: 'ID',
+						description: 'The ID of the person the event corresponds to. Choose from the list, or specify an ID.',
+					},
+				],
 			},
 		],
 	},
@@ -448,25 +435,14 @@ const properties: INodeProperties[] = [
 			{
 				displayName: 'Property Details',
 				name: 'propertyDetails',
+				// eslint-disable-next-line n8n-nodes-base/node-param-fixed-collection-type-unsorted-items
 				values: [
 					{
-						displayName: 'Area',
-						name: 'area',
+						displayName: 'Street',
+						name: 'street',
 						type: 'string',
 						default: '',
-						description: 'Square feet',
-					},
-					{
-						displayName: 'Bathrooms',
-						name: 'bathrooms',
-						type: 'string',
-						default: '',
-					},
-					{
-						displayName: 'Bedrooms',
-						name: 'bedrooms',
-						type: 'string',
-						default: '',
+						placeholder: '6825 Mulholland Dr',
 					},
 					{
 						displayName: 'City',
@@ -476,17 +452,18 @@ const properties: INodeProperties[] = [
 						placeholder: 'Los Angeles',
 					},
 					{
-						displayName: 'For Rent',
-						name: 'forRent',
-						type: 'boolean',
-						default: false,
-					},
-					{
-						displayName: 'Lot',
-						name: 'lot',
+						displayName: 'State',
+						name: 'state',
 						type: 'string',
 						default: '',
-						description: 'Acres',
+						placeholder: 'CA',
+					},
+					{
+						displayName: 'Zip Code',
+						name: 'code',
+						type: 'string',
+						default: '',
+						placeholder: '90068',
 					},
 					{
 						displayName: 'MLS Number',
@@ -503,18 +480,30 @@ const properties: INodeProperties[] = [
 						placeholder: '310000',
 					},
 					{
-						displayName: 'State',
-						name: 'state',
+						displayName: 'Bedrooms',
+						name: 'bedrooms',
 						type: 'string',
 						default: '',
-						placeholder: 'CA',
 					},
 					{
-						displayName: 'Street',
-						name: 'street',
+						displayName: 'Bathrooms',
+						name: 'bathrooms',
 						type: 'string',
 						default: '',
-						placeholder: '6825 Mulholland Dr',
+					},
+					{
+						displayName: 'Area',
+						name: 'area',
+						type: 'string',
+						default: '',
+						description: 'Square feet',
+					},
+					{
+						displayName: 'Lot',
+						name: 'lot',
+						type: 'string',
+						default: '',
+						description: 'Acres',
 					},
 					{
 						displayName: 'Type',
@@ -525,18 +514,17 @@ const properties: INodeProperties[] = [
 						description: 'E.g. Bungalow or Apartment.',
 					},
 					{
+						displayName: 'For Rent',
+						name: 'forRent',
+						type: 'boolean',
+						default: false,
+					},
+					{
 						displayName: 'URL',
 						name: 'url',
 						type: 'string',
 						default: '',
 						placeholder: 'http://www.zillow.com/homedetails/6825-Mulholland-Dr-Los-Angeles-CA-90068/2109065822_zpid/',
-					},
-					{
-						displayName: 'Zip Code',
-						name: 'code',
-						type: 'string',
-						default: '',
-						placeholder: '90068',
 					},
 				],
 			},
@@ -552,6 +540,7 @@ const properties: INodeProperties[] = [
 			{
 				displayName: 'Search Details',
 				name: 'searchDetails',
+				// eslint-disable-next-line n8n-nodes-base/node-param-fixed-collection-type-unsorted-items
 				values: [
 					{
 						displayName: 'City',
@@ -561,46 +550,19 @@ const properties: INodeProperties[] = [
 						placeholder: 'Los Angeles',
 					},
 					{
-						displayName: 'Max Bathrooms',
-						name: 'maxBathrooms',
+						displayName: 'State',
+						name: 'state',
 						type: 'string',
 						default: '',
-						placeholder: '3',
+						placeholder: 'CA',
 					},
 					{
-						displayName: 'Max Bedrooms',
-						name: 'maxBedrooms',
+						displayName: 'Zip Code',
+						name: 'code',
 						type: 'string',
 						default: '',
-						placeholder: '4',
-					},
-					{
-						displayName: 'Max Price',
-						name: 'maxPrice',
-						type: 'string',
-						default: '',
-						placeholder: '500000',
-					},
-					{
-						displayName: 'Min Bathrooms',
-						name: 'minBathrooms',
-						type: 'string',
-						default: '',
-						placeholder: '1',
-					},
-					{
-						displayName: 'Min Bedrooms',
-						name: 'minBedrooms',
-						type: 'string',
-						default: '',
-						placeholder: '2',
-					},
-					{
-						displayName: 'Min Price',
-						name: 'minPrice',
-						type: 'string',
-						default: '',
-						placeholder: '100000',
+						placeholder: '90068,90210',
+						description: 'A single zip code or a comma-separated list of zip codes',
 					},
 					{
 						displayName: 'Neighborhood',
@@ -610,11 +572,46 @@ const properties: INodeProperties[] = [
 						placeholder: 'Cahuenga Pass',
 					},
 					{
-						displayName: 'State',
-						name: 'state',
+						displayName: 'Min Price',
+						name: 'minPrice',
 						type: 'string',
 						default: '',
-						placeholder: 'CA',
+						placeholder: '100000',
+					},
+					{
+						displayName: 'Max Price',
+						name: 'maxPrice',
+						type: 'string',
+						default: '',
+						placeholder: '500000',
+					},
+					{
+						displayName: 'Min Bedrooms',
+						name: 'minBedrooms',
+						type: 'string',
+						default: '',
+						placeholder: '2',
+					},
+					{
+						displayName: 'Max Bedrooms',
+						name: 'maxBedrooms',
+						type: 'string',
+						default: '',
+						placeholder: '4',
+					},
+					{
+						displayName: 'Min Bathrooms',
+						name: 'minBathrooms',
+						type: 'string',
+						default: '',
+						placeholder: '1',
+					},
+					{
+						displayName: 'Max Bathrooms',
+						name: 'maxBathrooms',
+						type: 'string',
+						default: '',
+						placeholder: '3',
 					},
 					{
 						displayName: 'Type',
@@ -623,14 +620,6 @@ const properties: INodeProperties[] = [
 						default: '',
 						placeholder: 'Residential',
 						description: 'E.g. Residential, Lot, Apartment.',
-					},
-					{
-						displayName: 'Zip Code',
-						name: 'code',
-						type: 'string',
-						default: '',
-						placeholder: '90068,90210',
-						description: 'A single zip code or a comma-separated list of zip codes',
 					},
 				],
 			},
@@ -646,6 +635,7 @@ const properties: INodeProperties[] = [
 			{
 				displayName: 'Campaign Details',
 				name: 'campaignDetails',
+				// eslint-disable-next-line n8n-nodes-base/node-param-fixed-collection-type-unsorted-items
 				values: [
 					{
 						displayName: 'Campaign',
@@ -654,10 +644,11 @@ const properties: INodeProperties[] = [
 						default: '',
 					},
 					{
-						displayName: 'Content',
-						name: 'content',
+						displayName: 'Source',
+						name: 'source',
 						type: 'string',
 						default: '',
+						placeholder: 'Zillow',
 					},
 					{
 						displayName: 'Medium',
@@ -667,14 +658,15 @@ const properties: INodeProperties[] = [
 						placeholder: 'organic',
 					},
 					{
-						displayName: 'Page Duration',
-						name: 'pageDuration',
+						displayName: 'Term',
+						name: 'term',
 						type: 'string',
 						default: '',
+						placeholder: 'Cahuenga Pass land',
 					},
 					{
-						displayName: 'Page Referrer',
-						name: 'pageReferrer',
+						displayName: 'Content',
+						name: 'content',
 						type: 'string',
 						default: '',
 					},
@@ -691,23 +683,22 @@ const properties: INodeProperties[] = [
 						default: '',
 					},
 					{
-						displayName: 'Source',
-						name: 'source',
+						displayName: 'Page Referrer',
+						name: 'pageReferrer',
 						type: 'string',
 						default: '',
-						placeholder: 'Zillow',
 					},
 					{
-						displayName: 'Term',
-						name: 'term',
+						displayName: 'Page Duration',
+						name: 'pageDuration',
 						type: 'string',
 						default: '',
-						placeholder: 'Cahuenga Pass land',
 					},
 				],
 			},
 		],
 	},
+
 ];
 
 export const description = updateDisplayOptions(displayOptions, properties);
@@ -777,8 +768,9 @@ export async function execute(
 		const personObject: IDataObject = { ...personDetails };
 
 		if (personObject.assignedLenderId) {
+			const assignedLenderIdRaw = (personObject.assignedLenderId as IDataObject).value as string;
 			personObject.assignedLenderId = toInt(
-				personObject.assignedLenderId as string,
+				assignedLenderIdRaw,
 				'Assigned Lender ID',
 				this.getNode(),
 				i,
@@ -786,8 +778,9 @@ export async function execute(
 		}
 
 		if (personObject.assignedUserId) {
+			const assignedUserIdRaw = (personObject.assignedUserId as IDataObject).value as string;
 			personObject.assignedUserId = toInt(
-				personObject.assignedUserId as string,
+				assignedUserIdRaw,
 				'Assigned User ID',
 				this.getNode(),
 				i,
@@ -795,7 +788,8 @@ export async function execute(
 		}
 
 		if (personObject.id) {
-			personObject.id = toInt(personObject.id as string, 'ID', this.getNode(), i);
+			const personIdRaw = (personObject.id as IDataObject).value as string;
+			personObject.id = toInt(personIdRaw, 'ID', this.getNode(), i);
 		}
 
 		if (personDetails.emails) {
@@ -832,7 +826,8 @@ export async function execute(
 			if (customFields.customField) {
 				(customFields.customField as IDataObject[]).forEach((field) => {
 					if (field.name) {
-						personObject[field.name as string] = field.value;
+						const fieldNameRaw = (field.name as IDataObject).value as string;
+						personObject[fieldNameRaw] = field.value;
 					}
 				});
 			}

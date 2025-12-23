@@ -5,6 +5,8 @@ import {
     createGetAllOperationDescription,
     wrapData,
     toInt,
+    getPersonIdProperty,
+    getActionPlanIdProperty,
 } from '../../helpers/utils';
 
 const resource = 'actionPlansPeople';
@@ -13,21 +15,12 @@ export const description: INodeProperties[] = createGetAllOperationDescription({
     resource,
     resourceSpecificOptions: [
         {
-            displayName: 'Action Plan Name or ID',
-            name: 'actionPlanId',
-            type: 'options',
-            typeOptions: {
-                loadOptionsMethod: 'getActionPlans',
-            },
-            default: '',
-            description: 'ID of the action plan. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+            ...getActionPlanIdProperty(false, 'actionPlanId'),
+            description: 'ID of the action plan. Choose from the list, or specify an ID.',
         },
         {
-            displayName: 'Person ID',
-            name: 'personId',
-            type: 'string',
-            default: '',
-            description: 'ID of the person',
+            ...getPersonIdProperty(false),
+            description: 'ID of the person. Choose from the list, or specify an ID.',
         },
     ],
 });
@@ -41,10 +34,12 @@ export async function execute(
     const qs: IDataObject = {};
 
     if (options.personId) {
-        qs.personId = toInt(options.personId as string, 'Person ID', this.getNode(), i);
+        const personIdRaw = (options.personId as IDataObject).value as string;
+        qs.personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
     }
     if (options.actionPlanId) {
-        qs.actionPlanId = toInt(options.actionPlanId as string, 'Action Plan ID', this.getNode(), i);
+        const actionPlanIdRaw = (options.actionPlanId as IDataObject).value as string;
+        qs.actionPlanId = toInt(actionPlanIdRaw, 'Action Plan ID', this.getNode(), i);
     }
 
     const sort = this.getNodeParameter('sort', i, {}) as IDataObject;

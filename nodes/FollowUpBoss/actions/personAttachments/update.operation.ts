@@ -1,7 +1,6 @@
-import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
-import type { IDataObject } from 'n8n-workflow';
+import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty, getPersonAttachmentIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -12,20 +11,12 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Attachment ID',
-		name: 'id',
-		type: 'string',
-		default: '',
-		required: true,
-		description: 'ID of the attachment',
+		...getPersonAttachmentIdProperty(true, 'id'),
+		description: 'ID of the attachment to update',
 	},
 	{
-		displayName: 'Person ID',
-		name: 'personId',
-		type: 'string',
-		default: '',
-		required: true,
-		description: 'ID of the person',
+		...getPersonIdProperty(),
+		description: 'ID of the person. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'URI',
@@ -60,7 +51,7 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const idRaw = this.getNodeParameter('id', i) as string;
 	const id = toInt(idRaw, 'Attachment ID', this.getNode(), i);
-	const personIdRaw = this.getNodeParameter('personId', i) as string;
+	const personIdRaw = (this.getNodeParameter('personId', i) as IDataObject).value as string;
 	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	const uri = this.getNodeParameter('uri', i) as string;
 	const fileName = this.getNodeParameter('fileName', i) as string;

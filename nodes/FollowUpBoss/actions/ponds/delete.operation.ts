@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapDeleteSuccess } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapDeleteSuccess, getPondIdProperty, getUserIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,28 +11,14 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Pond Name or ID',
-		name: 'pondId',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getPonds',
-		},
-		default: '',
-		required: true,
+		...getPondIdProperty(true),
 		description:
-			'ID of the pond to delete. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'ID of the pond to delete. Choose from the list, or specify an ID.',
 	},
 	{
-		displayName: 'Assign To Agent Name or ID',
-		name: 'assignTo',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getUsers',
-		},
-		default: '',
-		required: true,
+		...getUserIdProperty('Assign To Agent', 'assignTo', true),
 		description:
-			'Select which agent should receive any contacts currently in this pond after it is deleted. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'Select which agent should receive any contacts currently in this pond after it is deleted. Choose from the list, or specify an ID.',
 	},
 ];
 
@@ -42,8 +28,10 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const pondId = toInt(this.getNodeParameter('pondId', i) as string, 'Pond ID', this.getNode(), i);
-	const assignTo = toInt(this.getNodeParameter('assignTo', i) as string, 'Assign To', this.getNode(), i);
+	const pondIdRaw = this.getNodeParameter('pondId', i) as string;
+	const pondId = toInt(pondIdRaw, 'Pond ID', this.getNode(), i);
+	const assignToRaw = this.getNodeParameter('assignTo', i) as string;
+	const assignTo = toInt(assignToRaw, 'Assign To User ID', this.getNode(), i);
 	const qs: IDataObject = { assignTo };
 	await apiRequest.call(this, 'DELETE', `/ponds/${pondId}`, {}, qs);
 	return wrapDeleteSuccess();

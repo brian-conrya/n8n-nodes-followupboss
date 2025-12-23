@@ -1,6 +1,6 @@
 import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getSmartListIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,16 +11,9 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Smart List Name or ID',
-		name: 'id',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getSmartLists',
-		},
-		default: '',
-		required: true,
+		...getSmartListIdProperty(true, 'id'),
 		description:
-			'ID of the smart list to retrieve. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'ID of the smart list to retrieve. Choose from the list, or specify an ID.',
 	},
 ];
 
@@ -30,7 +23,8 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const id = toInt(this.getNodeParameter('id', i) as string, 'ID', this.getNode(), i);
+	const idRaw = this.getNodeParameter('id', i) as string;
+	const id = toInt(idRaw, 'Smart List ID', this.getNode(), i);
 	const response = await apiRequest.call(this, 'GET', `/smartLists/${id}`);
 	return wrapData(response);
 }

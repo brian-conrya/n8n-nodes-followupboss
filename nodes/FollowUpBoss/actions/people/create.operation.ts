@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { updateDisplayOptions, wrapData, toFloat } from '../../helpers/utils';
+import { updateDisplayOptions, wrapData, toFloat, getUserIdProperty, getPondIdProperty, toInt, getLenderIdProperty, getCustomFieldIdProperty, getTimeframeIdProperty, getStageIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -27,15 +27,9 @@ const properties: INodeProperties[] = [
 		description: 'The last name of the person',
 	},
 	{
-		displayName: 'Stage Name or ID',
-		name: 'stage',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getStages',
-		},
-		default: '',
+		...getStageIdProperty(false, 'stage'),
 		description:
-			'The stage the person is in. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'The stage the person is in. Choose from the list, or specify a stage name.',
 	},
 	{
 		displayName: 'Source',
@@ -119,37 +113,17 @@ const properties: INodeProperties[] = [
 				],
 			},
 			{
-				displayName: 'Assigned Lender Name or ID',
-				name: 'assignedLenderId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getLenders',
-				},
-				default: '',
-				description:
-					'Lender assigned to this person. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				...getLenderIdProperty('Assigned Lender', 'assignedLenderId', false),
+				description: 'Lender assigned to this person. Choose from the list, or specify an ID.',
 			},
 			{
-				displayName: 'Assigned Pond Name or ID',
+				...getPondIdProperty(false),
 				name: 'assignedPondId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getPonds',
-				},
-				default: '',
-				description:
-					'Pond assigned to this person. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				description: 'Pond assigned to this person. Choose from the list, or specify an ID.',
 			},
 			{
-				displayName: 'Assigned User Name or ID',
-				name: 'assignedUserId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getUsers',
-				},
-				default: '',
-				description:
-					'Agent assigned to this person. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				...getUserIdProperty('Assigned User', 'assignedUserId', false),
+				description: 'Agent assigned to this person. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Background',
@@ -199,16 +173,9 @@ const properties: INodeProperties[] = [
 						displayName: 'Custom Field',
 						values: [
 							{
-								// eslint-disable-next-line n8n-nodes-base/node-param-display-name-wrong-for-dynamic-options
-								displayName: 'Field Label or Name',
-								name: 'key',
-								type: 'options',
-								typeOptions: {
-									loadOptionsMethod: 'getCustomFields',
-								},
-								default: '',
+								...getCustomFieldIdProperty(true, 'key'),
 								description:
-									'Name of the custom field (with or without "custom" prefix). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+									'Name of the custom field (with or without "custom" prefix). Choose from the list, or specify an ID.',
 							},
 							{
 								displayName: 'Value',
@@ -351,15 +318,9 @@ const properties: INodeProperties[] = [
 				],
 			},
 			{
-				displayName: 'Timeframe Name or ID',
-				name: 'timeframeId',
-				type: 'options',
-				typeOptions: {
-					loadOptionsMethod: 'getTimeframes',
-				},
-				default: '',
+				...getTimeframeIdProperty(false, 'timeframeId'),
 				description:
-					'Timeframe to move. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+					'Timeframe to move. Choose from the list, or specify an ID.',
 			},
 		],
 	},
@@ -373,14 +334,14 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const firstName = this.getNodeParameter('firstName', i) as string;
 	const lastName = this.getNodeParameter('lastName', i) as string;
-	const stage = this.getNodeParameter('stage', i) as string;
+	const stageRaw = (this.getNodeParameter('stage', i, { value: '' }) as IDataObject).value as string;
 	const source = this.getNodeParameter('source', i) as string;
 	const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
 
 	const body: IDataObject = {
 		firstName,
 		lastName,
-		stage,
+		stage: stageRaw,
 		source,
 		...additionalFields,
 	};
@@ -401,17 +362,35 @@ export async function execute(
 	if (additionalFields.customFieldsUi) {
 		const customFields = (additionalFields.customFieldsUi as IDataObject)
 			.customFieldsValues as IDataObject[];
-		if (customFields) {
-			customFields.forEach((field) => {
-				const key = field.key as string;
-				if (key.startsWith('custom')) {
-					body[key] = field.value;
-				} else {
-					body[`custom${key}`] = field.value;
-				}
-			});
-		}
+		customFields.forEach((field) => {
+			const keyRaw = (field.key as IDataObject).value as string;
+			if (keyRaw.startsWith('custom')) {
+				body[keyRaw] = field.value;
+			} else {
+				body[`custom${keyRaw}`] = field.value;
+			}
+		});
 		delete body.customFieldsUi;
+	}
+
+	if (additionalFields.assignedLenderId) {
+		const assignedLenderIdRaw = (additionalFields.assignedLenderId as IDataObject).value as string;
+		body.assignedLenderId = toInt(assignedLenderIdRaw, 'Assigned Lender ID', this.getNode(), i);
+	}
+
+	if (additionalFields.assignedPondId) {
+		const assignedPondIdRaw = (additionalFields.assignedPondId as IDataObject).value as string;
+		body.assignedPondId = toInt(assignedPondIdRaw, 'Assigned Pond ID', this.getNode(), i);
+	}
+
+	if (additionalFields.assignedUserId) {
+		const assignedUserIdRaw = (additionalFields.assignedUserId as IDataObject).value as string;
+		body.assignedUserId = toInt(assignedUserIdRaw, 'Assigned User ID', this.getNode(), i);
+	}
+
+	if (additionalFields.timeframeId) {
+		const timeframeIdRaw = (additionalFields.timeframeId as IDataObject).value as string;
+		body.timeframeId = toInt(timeframeIdRaw, 'Timeframe ID', this.getNode(), i);
 	}
 
 	if (additionalFields.addressesUi) {

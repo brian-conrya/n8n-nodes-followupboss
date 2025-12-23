@@ -1,7 +1,7 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty, getUserIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -12,13 +12,8 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Person ID',
+		...getPersonIdProperty(),
 		name: 'personId',
-		type: 'string',
-		default: '',
-		required: true,
-		placeholder: '12254',
-		description: 'The ID of a person associated with this call',
 	},
 	{
 		displayName: 'Phone',
@@ -41,7 +36,7 @@ const properties: INodeProperties[] = [
 		displayName: 'Duration',
 		name: 'duration',
 		type: 'number',
-		default: '',
+		default: 0,
 		placeholder: '63',
 		description: 'Length of the call in seconds',
 	},
@@ -93,14 +88,8 @@ const properties: INodeProperties[] = [
 		description: 'The phone number this call was made to',
 	},
 	{
-		displayName: 'User Name or ID',
-		name: 'userId',
-		type: 'options',
-		typeOptions: {
-			loadOptionsMethod: 'getUsers',
-		},
-		default: '',
-		description: 'The user that made or received the call (can only be set by administrators, otherwise the currently logged in user\'s ID is used). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		...getUserIdProperty('User', 'userId', false),
+		description: 'The user that made or received the call (can only be set by administrators, otherwise the currently logged in user\'s ID is used). Choose from the list, or specify an ID.',
 	},
 ];
 
@@ -110,7 +99,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const personIdRaw = this.getNodeParameter('personId', i) as string;
+	const personIdRaw = (this.getNodeParameter('personId', i) as IDataObject).value as string;
 	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	const phone = this.getNodeParameter('phone', i) as string;
 	const isIncoming = this.getNodeParameter('isIncoming', i) as boolean;
@@ -120,7 +109,7 @@ export async function execute(
 	const outcome = this.getNodeParameter('outcome', i) as string;
 	const recordingUrl = this.getNodeParameter('recordingUrl', i) as string;
 	const toNumber = this.getNodeParameter('toNumber', i) as string;
-	const userIdRaw = this.getNodeParameter('userId', i) as string;
+	const userIdParam = this.getNodeParameter('userId', i) as IDataObject;
 
 	const body: IDataObject = {
 		personId,
@@ -146,8 +135,8 @@ export async function execute(
 	if (toNumber) {
 		body.toNumber = toNumber;
 	}
-	if (userIdRaw) {
-		body.userId = toInt(userIdRaw, 'User ID', this.getNode(), i);
+	if (userIdParam?.value) {
+		body.userId = toInt(userIdParam.value as string, 'User ID', this.getNode(), i);
 	}
 
 	const response = await apiRequest.call(this, 'POST', '/calls', body);

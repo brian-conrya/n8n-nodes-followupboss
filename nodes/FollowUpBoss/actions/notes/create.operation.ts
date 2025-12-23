@@ -1,6 +1,6 @@
-import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -11,13 +11,8 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Person ID',
-		name: 'personId',
-		type: 'string',
-		default: '',
-		required: true,
-		placeholder: 'e.g. 12345',
-		description: 'The ID of a person',
+		...getPersonIdProperty(),
+		description: 'The ID of a person. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Subject',
@@ -31,13 +26,14 @@ const properties: INodeProperties[] = [
 		displayName: 'Body',
 		name: 'body',
 		type: 'string',
+		typeOptions: {
+			editor: 'htmlEditor',
+			rows: 5,
+		},
 		default: '',
 		required: true,
 		placeholder: 'e.g. Discussed pricing and timeline',
 		description: 'The content of the note',
-		typeOptions: {
-			rows: 5,
-		},
 	},
 	{
 		displayName: 'Is HTML',
@@ -55,7 +51,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const personIdRaw = this.getNodeParameter('personId', index) as string;
+	const personIdRaw = (this.getNodeParameter('personId', index) as IDataObject).value as string;
 	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), index);
 	const bodyContent = this.getNodeParameter('body', index) as string;
 	const subject = this.getNodeParameter('subject', index) as string;
