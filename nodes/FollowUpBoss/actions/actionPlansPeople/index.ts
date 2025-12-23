@@ -37,7 +37,7 @@ export const description: INodeProperties[] = [
                 action: 'Update an action plans people',
             },
         ],
-        default: 'getAll',
+        default: 'create',
     },
     ...create.description,
     ...getAll.description,

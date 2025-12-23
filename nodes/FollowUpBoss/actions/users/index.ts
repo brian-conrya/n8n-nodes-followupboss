@@ -39,7 +39,7 @@ export const description: INodeProperties[] = [
                 action: 'Get current user',
             },
         ],
-        default: 'get',
+        default: 'getAll',
         displayOptions: {
             show: {
                 resource: ['users'],

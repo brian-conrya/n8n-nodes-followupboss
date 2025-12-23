@@ -44,7 +44,7 @@ export const description: INodeProperties[] = [
                 action: 'Update an automation assignment',
             },
         ],
-        default: 'getAll',
+        default: 'create',
     },
     ...create.description,
     ...get.description,

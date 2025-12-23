@@ -169,7 +169,7 @@ export const description: INodeProperties[] = [
                 action: 'Update a person',
             },
         ],
-        default: 'get',
+        default: 'create',
     },
     ...addCollaborators.description,
     ...addTags.description,

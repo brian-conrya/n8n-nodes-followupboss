@@ -37,7 +37,7 @@ export const description: INodeProperties[] = [
                 action: 'Log a text message',
             },
         ],
-        default: 'get',
+        default: 'log',
     },
     ...getAll.description,
     ...get.description,
