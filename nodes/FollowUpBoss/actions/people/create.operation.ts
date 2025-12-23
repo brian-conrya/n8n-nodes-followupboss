@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { updateDisplayOptions, wrapData, toFloat, getUserIdProperty, getPondIdProperty, toInt, getLenderIdProperty, getCustomFieldIdProperty, getTimeframeIdProperty, getStageIdProperty } from '../../helpers/utils';
+import { updateDisplayOptions, wrapData, toFloat, getUserIdProperty, getPondIdProperty, toInt, getLenderIdProperty, getCustomFieldIdProperty, getTimeframeIdProperty, getStageIdProperty, getTagsProperty, normalizeTags } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -39,6 +39,7 @@ const properties: INodeProperties[] = [
 		placeholder: 'e.g. Zillow',
 		description: 'The lead source for the person',
 	},
+	...getTagsProperty(),
 	{
 		displayName: 'Additional Fields',
 		name: 'additionalFields',
@@ -291,36 +292,8 @@ const properties: INodeProperties[] = [
 				description: 'Direct link to the information about a person at the lead provider',
 			},
 			{
-				displayName: 'Tags',
-				name: 'tagsUi',
-				type: 'fixedCollection',
-				typeOptions: {
-					multipleValues: true,
-				},
-				default: {},
-				placeholder: 'Add Tag',
-				description: 'Tags to add to the person',
-				options: [
-					{
-						displayName: 'Tag',
-						name: 'tagsValues',
-						values: [
-							{
-								displayName: 'Tag',
-								name: 'tag',
-								type: 'string',
-								default: '',
-								placeholder: 'e.g. Buyer',
-								description: 'Tag name',
-							},
-						],
-					},
-				],
-			},
-			{
 				...getTimeframeIdProperty(false, 'timeframeId'),
-				description:
-					'Timeframe to move. Choose from the list, or specify an ID.',
+				description: 'Timeframe to move. Choose from the list, or specify an ID.',
 			},
 		],
 	},
@@ -350,14 +323,22 @@ export async function execute(
 		body.price = toFloat(additionalFields.price as string, 'Price', this.getNode(), i);
 	}
 
-	if (additionalFields.tagsUi) {
-		const tagsData = additionalFields.tagsUi as { tagsValues?: Array<{ tag: string }> };
-		const tags = (tagsData.tagsValues || []).map((item) => item.tag).filter((tag) => tag.length > 0);
-		if (tags.length > 0) {
-			body.tags = tags;
-		}
-		delete body.tagsUi;
+	const tagsMode = this.getNodeParameter('tagsMode', i, 'manual') as string;
+	let tags: string[] = [];
+	if (tagsMode === 'manual') {
+		const tagsManual = this.getNodeParameter('tagsManual', i, '') as string;
+		tags = normalizeTags(tagsMode, tagsManual, undefined);
+	} else {
+		const tagsJson = this.getNodeParameter('tagsJson', i, undefined);
+		tags = normalizeTags(tagsMode, undefined, tagsJson);
 	}
+	if (tags.length > 0) {
+		body.tags = tags;
+	}
+	delete body.tagsMode;
+	delete body.tagsManual;
+	delete body.tagsJson;
+	delete body.tagsUi;
 
 	if (additionalFields.customFieldsUi) {
 		const customFields = (additionalFields.customFieldsUi as IDataObject)

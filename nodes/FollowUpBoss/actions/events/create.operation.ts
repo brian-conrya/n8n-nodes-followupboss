@@ -1,6 +1,6 @@
 import { IExecuteFunctions, INodeExecutionData, INodeProperties, IDataObject, IDisplayOptions } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toFloat, toInt, updateDisplayOptions, wrapData, getLenderIdProperty, getUserIdProperty, getPersonIdProperty, getCustomFieldIdProperty } from '../../helpers/utils';
+import { toFloat, toInt, updateDisplayOptions, wrapData, getLenderIdProperty, getUserIdProperty, getPersonIdProperty, getCustomFieldIdProperty, getTagsProperty, normalizeTags } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -342,33 +342,9 @@ const properties: INodeProperties[] = [
 							},
 						]
 					},
+					...getTagsProperty(),
 					{
-						displayName: 'Tags',
-						name: 'tags',
-						type: 'fixedCollection',
-						default: {},
-						placeholder: 'Add Tag',
-						typeOptions: {
-							multiple: true,
-						},
-						options: [
-							{
-								displayName: 'Tag',
-								name: 'tag',
-								values: [
-									{
-										displayName: 'Value',
-										name: 'value',
-										type: 'string',
-										default: '',
-										placeholder: 'Buyer',
-									},
-								],
-							},
-						],
-					},
-					{
-						displayName: 'Assigned To',
+						displayName: 'Assigned Agent Name',
 						name: 'assignedTo',
 						type: 'string',
 						default: '',
@@ -815,11 +791,17 @@ export async function execute(
 			}
 		}
 
-		if (personDetails.tags) {
-			const tags = personDetails.tags as IDataObject;
-			if (tags.tag) {
-				personObject.tags = (tags.tag as IDataObject[]).map((tag) => tag.value as string);
-			}
+		const tagsMode = this.getNodeParameter('person.personDetails.tagsMode', i, 'manual') as string;
+		let tags: string[] = [];
+		if (tagsMode === 'manual') {
+			const tagsManual = this.getNodeParameter('person.personDetails.tagsManual', i, '') as string;
+			tags = normalizeTags(tagsMode, tagsManual, undefined);
+		} else {
+			const tagsJson = this.getNodeParameter('person.personDetails.tagsJson', i, undefined);
+			tags = normalizeTags(tagsMode, undefined, tagsJson);
+		}
+		if (tags.length > 0) {
+			personObject.tags = tags;
 		}
 		if (personDetails.customFields) {
 			const customFields = personDetails.customFields as IDataObject;

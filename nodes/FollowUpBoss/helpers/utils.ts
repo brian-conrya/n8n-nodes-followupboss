@@ -782,3 +782,77 @@ export function flattenPersonContactInfo(person: IDataObject): IDataObject {
 	}
 	return newPerson;
 }
+
+export function getTagsProperty(displayName = 'Tags'): INodeProperties[] {
+	return [
+		{
+			displayName: 'Tags Input Mode',
+			name: 'tagsMode',
+			type: 'options',
+			default: 'manual',
+			description: 'Choose how to provide the tags',
+			options: [
+				{
+					name: 'Manual (One Per Line)',
+					value: 'manual',
+					description: 'Best for static tags or copy-pasting from Excel',
+				},
+				{
+					name: 'Map / JSON Array',
+					value: 'json',
+					description: 'Best for dynamic arrays from previous nodes',
+				},
+			],
+		},
+		{
+			displayName,
+			name: 'tagsManual',
+			type: 'string',
+			typeOptions: {
+				rows: 4,
+			},
+			displayOptions: {
+				show: {
+					tagsMode: ['manual'],
+				},
+			},
+			default: '',
+			placeholder: 'Lead\nSource: Zillow, Trulia\n2025 Prospect',
+			description: 'Enter one tag per line. Commas inside lines are preserved.',
+		},
+		{
+			displayName: `${displayName} (JSON)`,
+			name: 'tagsJson',
+			type: 'json',
+			displayOptions: {
+				show: {
+					tagsMode: ['json'],
+				},
+			},
+			default: '',
+			description: 'Map an array of strings here (e.g., {{ $JSON.tags }})',
+		},
+	];
+}
+
+export function normalizeTags(
+	tagsMode: string,
+	tagsManual: string | undefined,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	tagsJson: any,
+): string[] {
+	if (tagsMode === 'manual') {
+		return (tagsManual || '')
+			.split('\n')
+			.map((tag) => tag.trim())
+			.filter((tag) => tag.length > 0);
+	} else if (tagsMode === 'json') {
+		if (Array.isArray(tagsJson)) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			return tagsJson.map((tag: any) => String(tag));
+		} else if (tagsJson !== null && tagsJson !== undefined && tagsJson !== '') {
+			return [String(tagsJson)];
+		}
+	}
+	return [];
+}

@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, toFloat, getPersonIdProperty, getLenderIdProperty, getPondIdProperty, getUserIdProperty, getCustomFieldIdProperty, getStageIdProperty, getTimeframeIdProperty } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, toFloat, getPersonIdProperty, getLenderIdProperty, getPondIdProperty, getUserIdProperty, getCustomFieldIdProperty, getStageIdProperty, getTimeframeIdProperty, getTagsProperty, normalizeTags } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -14,6 +14,7 @@ const properties: INodeProperties[] = [
 		...getPersonIdProperty(),
 		name: 'id',
 	},
+	...getTagsProperty(),
 	{
 		displayName: 'Update Fields',
 		name: 'updateFields',
@@ -246,35 +247,8 @@ const properties: INodeProperties[] = [
 					'The stage the person is in. Choose from the list, or specify a stage name.',
 			},
 			{
-				displayName: 'Tags',
-				name: 'tagsUi',
-				type: 'fixedCollection',
-				typeOptions: {
-					multipleValues: true,
-				},
-				default: {},
-				placeholder: 'Add Tag',
-				description: 'Tags to add to the person',
-				options: [
-					{
-						displayName: 'Tag',
-						name: 'tagsValues',
-						values: [
-							{
-								displayName: 'Tag',
-								name: 'tag',
-								type: 'string',
-								default: '',
-								description: 'Tag name',
-							},
-						],
-					},
-				],
-			},
-			{
 				...getTimeframeIdProperty(false, 'timeframeId'),
-				description:
-					'Timeframe to move. Choose from the list, or specify an ID.',
+				description: 'Timeframe to move. Choose from the list, or specify an ID.',
 			},
 		],
 	},
@@ -298,14 +272,22 @@ export async function execute(
 		body.price = toFloat(updateFields.price as string, 'Price', this.getNode(), i);
 	}
 
-	if (updateFields.tagsUi) {
-		const tagsData = updateFields.tagsUi as { tagsValues?: Array<{ tag: string }> };
-		const tags = (tagsData.tagsValues || []).map((item) => item.tag).filter((tag) => tag.length > 0);
-		if (tags.length > 0) {
-			body.tags = tags;
-		}
-		delete body.tagsUi;
+	const tagsMode = this.getNodeParameter('tagsMode', i, 'manual') as string;
+	let tags: string[] = [];
+	if (tagsMode === 'manual') {
+		const tagsManual = this.getNodeParameter('tagsManual', i, '') as string;
+		tags = normalizeTags(tagsMode, tagsManual, undefined);
+	} else {
+		const tagsJson = this.getNodeParameter('tagsJson', i, undefined);
+		tags = normalizeTags(tagsMode, undefined, tagsJson);
 	}
+	if (tags.length > 0) {
+		body.tags = tags;
+	}
+	delete body.tagsMode;
+	delete body.tagsManual;
+	delete body.tagsJson;
+	delete body.tagsUi;
 
 	if (updateFields.customFieldsUi) {
 		const customFields = (updateFields.customFieldsUi as IDataObject)
