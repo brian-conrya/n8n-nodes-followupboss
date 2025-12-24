@@ -16,6 +16,11 @@ const properties: INodeProperties[] = [
 		name: 'id',
 		description: 'ID of the appointment type to delete. Choose from the list, or specify an ID.',
 	},
+	{
+		...getAppointmentTypeIdProperty(true, 'assignTypeId'),
+		displayName: 'Reassign Appointments To',
+		description: 'The type ID to reassign existing appointments. Choose from the list, or specify an ID.',
+	},
 ];
 
 export const description = updateDisplayOptions(displayOptions, properties);
@@ -26,6 +31,9 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Appointment Type ID', this.getNode(), i);
-	await apiRequest.call(this, 'DELETE', `/appointmentTypes/${id}`);
+	const assignTypeIdRaw = (this.getNodeParameter('assignTypeId', i) as IDataObject).value as string;
+	const assignTypeId = toInt(assignTypeIdRaw, 'Assign Type ID', this.getNode(), i);
+
+	await apiRequest.call(this, 'DELETE', `/appointmentTypes/${id}`, undefined, { assignTypeId });
 	return wrapDeleteSuccess();
 }

@@ -69,6 +69,18 @@ export async function getAutomations(this: ILoadOptionsFunctions, filter?: strin
     return { results: mapped.sort((a, b) => a.name.localeCompare(b.name)) };
 }
 
+export async function getManualAutomations(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
+    const results = await apiRequestAllItems.call(this, '/automations', { manualOnly: true });
+    let mapped = results.map((item: IDataObject) => ({
+        name: item.name as string,
+        value: item.id as number,
+    }));
+    if (filter) {
+        mapped = mapped.filter((item) => item.name.toLowerCase().includes(filter.toLowerCase()));
+    }
+    return { results: mapped.sort((a, b) => a.name.localeCompare(b.name)) };
+}
+
 export async function getPipelineStages(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
     const pipelines = await apiRequestAllItems.call(this, '/pipelines', {});
     let stages: { name: string; value: number }[] = [];

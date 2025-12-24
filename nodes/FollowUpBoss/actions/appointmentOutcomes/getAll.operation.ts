@@ -8,7 +8,10 @@ import {
 
 const resource = 'appointmentOutcomes';
 
-export const description: INodeProperties[] = createGetAllOperationDescription({ resource });
+export const description: INodeProperties[] = createGetAllOperationDescription({
+	resource,
+	includeDates: false,
+});
 
 export async function execute(
 	this: IExecuteFunctions,

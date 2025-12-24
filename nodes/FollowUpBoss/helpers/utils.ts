@@ -124,22 +124,8 @@ export function wrapData(data: IDataObject | IDataObject[]): INodeExecutionData[
 	}));
 }
 
-export function getCommonFiltersProperties(): INodeProperties[] {
-	return [
-		{
-			displayName: 'Created After',
-			name: 'createdAfter',
-			type: 'dateTime',
-			default: '',
-			description: 'Filter records created after a given date/time',
-		},
-		{
-			displayName: 'Created Before',
-			name: 'createdBefore',
-			type: 'dateTime',
-			default: '',
-			description: 'Filter records created before a given date/time',
-		},
+export function getCommonFiltersProperties(includeDates = true): INodeProperties[] {
+	const properties: INodeProperties[] = [
 		{
 			displayName: 'ID Greater Than',
 			name: 'idGreaterThan',
@@ -162,22 +148,42 @@ export function getCommonFiltersProperties(): INodeProperties[] {
 			description: 'A comma-separated list of IDs to retrieve',
 			placeholder: 'e.g. 1,2,3',
 		},
-
-		{
-			displayName: 'Updated After',
-			name: 'updatedAfter',
-			type: 'dateTime',
-			default: '',
-			description: 'Filter records updated after a given date/time',
-		},
-		{
-			displayName: 'Updated Before',
-			name: 'updatedBefore',
-			type: 'dateTime',
-			default: '',
-			description: 'Filter records updated before a given date/time',
-		},
 	];
+
+	if (includeDates) {
+		properties.push(
+			{
+				displayName: 'Created After',
+				name: 'createdAfter',
+				type: 'dateTime',
+				default: '',
+				description: 'Filter records created after a given date/time',
+			},
+			{
+				displayName: 'Created Before',
+				name: 'createdBefore',
+				type: 'dateTime',
+				default: '',
+				description: 'Filter records created before a given date/time',
+			},
+			{
+				displayName: 'Updated After',
+				name: 'updatedAfter',
+				type: 'dateTime',
+				default: '',
+				description: 'Filter records updated after a given date/time',
+			},
+			{
+				displayName: 'Updated Before',
+				name: 'updatedBefore',
+				type: 'dateTime',
+				default: '',
+				description: 'Filter records updated before a given date/time',
+			},
+		);
+	}
+
+	return properties;
 }
 
 export interface IResourceLocatorOptions {
@@ -396,11 +402,11 @@ export function getActionPlanIdProperty(required = true, name = 'actionPlanId'):
 	});
 }
 
-export function getAutomationIdProperty(required = true, name = 'automationId'): INodeProperties {
+export function getAutomationIdProperty(required = true, name = 'automationId', manualOnly = false): INodeProperties {
 	return getResourceLocatorProperty({
 		displayName: 'Automation',
 		name,
-		searchListMethod: 'getAutomations',
+		searchListMethod: manualOnly ? 'getManualAutomations' : 'getAutomations',
 		required,
 	});
 }
@@ -694,12 +700,13 @@ export function getReturnAllProperties(): INodeProperties[] {
 interface IGetAllDescriptionOptions {
 	resource: string;
 	resourceSpecificOptions?: INodeProperties[];
+	includeDates?: boolean;
 }
 
 export function createGetAllOperationDescription(
 	options: IGetAllDescriptionOptions,
 ): INodeProperties[] {
-	const { resource, resourceSpecificOptions = [] } = options;
+	const { resource, resourceSpecificOptions = [], includeDates = true } = options;
 
 	const displayOptions = {
 		show: {
@@ -708,8 +715,8 @@ export function createGetAllOperationDescription(
 		},
 	};
 
-	const allOptions = [...getCommonFiltersProperties(), ...resourceSpecificOptions].sort((a, b) =>
-		a.displayName.localeCompare(b.displayName),
+	const allOptions = [...getCommonFiltersProperties(includeDates), ...resourceSpecificOptions].sort(
+		(a, b) => a.displayName.localeCompare(b.displayName),
 	);
 
 	const description: INodeProperties[] = [

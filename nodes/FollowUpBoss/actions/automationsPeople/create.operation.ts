@@ -15,7 +15,7 @@ const properties: INodeProperties[] = [
 		description: 'ID of the person to assign the automation to. Choose from the list, or specify an ID.',
 	},
 	{
-		...getAutomationIdProperty(true, 'automationId'),
+		...getAutomationIdProperty(true, 'automationId', true),
 		description:
 			'ID of the automation to assign. Choose from the list, or specify an ID.',
 	},

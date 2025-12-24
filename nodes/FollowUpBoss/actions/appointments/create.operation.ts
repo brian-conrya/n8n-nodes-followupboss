@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty, getAppointmentOutcomeIdProperty } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getAppointmentOutcomeIdProperty, getAppointmentTypeIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -10,13 +10,6 @@ const displayOptions: IDisplayOptions = {
 };
 
 const properties: INodeProperties[] = [
-	{
-		...getPersonIdProperty(),
-		displayName: 'Person',
-		name: 'personId',
-		required: true,
-		description: 'ID of the person to create the appointment for. Choose from the list, or specify an ID.',
-	},
 	{
 		displayName: 'Start Time',
 		name: 'start',
@@ -43,6 +36,10 @@ const properties: INodeProperties[] = [
 		description: 'Title of the appointment',
 	},
 	{
+		...getAppointmentTypeIdProperty(false),
+		description: 'The type of the appointment. Choose from the list, or specify an ID.',
+	},
+	{
 		displayName: 'Additional Fields',
 		name: 'additionalFields',
 		type: 'collection',
@@ -65,45 +62,36 @@ const properties: INodeProperties[] = [
 				description: 'Description of the appointment',
 			},
 			{
-				displayName: 'Invitees',
-				name: 'invitees',
-				type: 'fixedCollection',
-				default: [],
-				typeOptions: {
-					multipleValues: true,
-				},
-				options: [
-					{
-						name: 'invitee',
-						displayName: 'Invitee',
-						values: [
-							{
-								displayName: 'Name',
-								name: 'name',
-								type: 'string',
-								default: '',
-								placeholder: 'e.g. Sarah Jones',
-								description: 'Name of the invitee',
-							},
-							{
-								displayName: 'Email',
-								name: 'email',
-								type: 'string',
-								default: '',
-								placeholder: 'name@email.com',
-								description: 'Email of the invitee',
-							},
-							{
-								...getPersonIdProperty(),
-								displayName: 'Person',
-								name: 'personId',
-								required: false,
-								description: 'ID of the person to invite. Choose from the list, or specify an ID.',
-							},
-						],
-					},
-				],
-				description: 'List of people to invite',
+				displayName: 'Invitee User IDs',
+				name: 'inviteeUserIds',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. 1, 2, 3',
+				description: 'Comma-separated list of User IDs to invite',
+			},
+			{
+				displayName: 'Invitee Person IDs',
+				name: 'inviteePersonIds',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. 123, 456',
+				description: 'Comma-separated list of Person IDs to invite',
+			},
+			{
+				displayName: 'Invitee Relationship IDs',
+				name: 'inviteeRelationshipIds',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. 789, 012',
+				description: 'Comma-separated list of Relationship IDs to invite',
+			},
+			{
+				displayName: 'Invitee Emails',
+				name: 'inviteeEmails',
+				type: 'string',
+				default: '',
+				placeholder: 'name@email.com, other@email.com',
+				description: 'Comma-separated list of emails to invite',
 			},
 			{
 				...getAppointmentOutcomeIdProperty(false, 'outcomeId'),
@@ -120,8 +108,6 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const personIdRaw = (this.getNodeParameter('personId', index) as IDataObject).value as string;
-	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), index);
 	const start = this.getNodeParameter('start', index) as string;
 	const end = this.getNodeParameter('end', index) as string;
 	const title = this.getNodeParameter('title', index) as string;
@@ -132,19 +118,56 @@ export async function execute(
 	}
 
 	const body: IDataObject = {
-		personId,
 		start,
 		end,
 		title,
 		...additionalFields,
 	};
 
-	if (additionalFields.invitees) {
-		const inviteesData = additionalFields.invitees as IDataObject;
-		if (inviteesData.invitee) {
-			body.invitees = inviteesData.invitee;
-		}
+	if (this.getNodeParameter('typeId', index, undefined)) {
+		body.typeId = (this.getNodeParameter('typeId', index) as IDataObject).value;
 	}
+
+	const invitees: IDataObject[] = [];
+	if (additionalFields.inviteeUserIds) {
+		(additionalFields.inviteeUserIds as string)
+			.split(',')
+			.map((s) => s.trim())
+			.filter(Boolean)
+			.forEach((userId) => invitees.push({ userId: toInt(userId, 'User ID', this.getNode(), index) }));
+	}
+	if (additionalFields.inviteePersonIds) {
+		(additionalFields.inviteePersonIds as string)
+			.split(',')
+			.map((s) => s.trim())
+			.filter(Boolean)
+			.forEach((personId) => invitees.push({ personId: toInt(personId, 'Person ID', this.getNode(), index) }));
+	}
+	if (additionalFields.inviteeRelationshipIds) {
+		(additionalFields.inviteeRelationshipIds as string)
+			.split(',')
+			.map((s) => s.trim())
+			.filter(Boolean)
+			.forEach((relationshipId) =>
+				invitees.push({ relationshipId: toInt(relationshipId, 'Relationship ID', this.getNode(), index) }),
+			);
+	}
+	if (additionalFields.inviteeEmails) {
+		(additionalFields.inviteeEmails as string)
+			.split(',')
+			.map((s) => s.trim())
+			.filter(Boolean)
+			.forEach((email) => invitees.push({ email }));
+	}
+
+	if (invitees.length > 0) {
+		body.invitees = invitees;
+	}
+
+	delete body.inviteeUserIds;
+	delete body.inviteePersonIds;
+	delete body.inviteeRelationshipIds;
+	delete body.inviteeEmails;
 
 	const response = await apiRequest.call(this, 'POST', '/appointments', body);
 	return wrapData(response);
