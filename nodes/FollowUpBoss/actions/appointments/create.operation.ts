@@ -62,12 +62,12 @@ const properties: INodeProperties[] = [
 				description: 'Description of the appointment',
 			},
 			{
-				displayName: 'Invitee User IDs',
-				name: 'inviteeUserIds',
+				displayName: 'Invitee Emails',
+				name: 'inviteeEmails',
 				type: 'string',
 				default: '',
-				placeholder: 'e.g. 1, 2, 3',
-				description: 'Comma-separated list of User IDs to invite',
+				placeholder: 'name@email.com, other@email.com',
+				description: 'Comma-separated list of emails to invite',
 			},
 			{
 				displayName: 'Invitee Person IDs',
@@ -86,12 +86,12 @@ const properties: INodeProperties[] = [
 				description: 'Comma-separated list of Relationship IDs to invite',
 			},
 			{
-				displayName: 'Invitee Emails',
-				name: 'inviteeEmails',
+				displayName: 'Invitee User IDs',
+				name: 'inviteeUserIds',
 				type: 'string',
 				default: '',
-				placeholder: 'name@email.com, other@email.com',
-				description: 'Comma-separated list of emails to invite',
+				placeholder: 'e.g. 1, 2, 3',
+				description: 'Comma-separated list of User IDs to invite',
 			},
 			{
 				...getAppointmentOutcomeIdProperty(false, 'outcomeId'),

@@ -1,5 +1,4 @@
 import {
-
     type IHookFunctions,
     type IWebhookFunctions,
     type INodeType,
@@ -12,65 +11,10 @@ import {
 import { createHmac, timingSafeEqual } from 'crypto';
 import { apiRequest } from './transport';
 import { wrapData } from './helpers/utils';
+import { WEBHOOK_EVENT_MAP } from './constants';
 import * as methods from './methods';
 
 const MAX_WEBHOOKS_PER_EVENT = 2;
-
-const EVENT_TRIGGER_MAP: { [key: string]: string } = {
-    'Appointments Created': 'appointmentsCreated',
-    'Appointments Deleted': 'appointmentsDeleted',
-    'Appointments Updated': 'appointmentsUpdated',
-    'Calls Created': 'callsCreated',
-    'Calls Deleted': 'callsDeleted',
-    'Calls Updated': 'callsUpdated',
-    'Custom Fields Created': 'customFieldsCreated',
-    'Custom Fields Deleted': 'customFieldsDeleted',
-    'Custom Fields Updated': 'customFieldsUpdated',
-    'Deal Custom Fields Created': 'dealCustomFieldsCreated',
-    'Deal Custom Fields Deleted': 'dealCustomFieldsDeleted',
-    'Deal Custom Fields Updated': 'dealCustomFieldsUpdated',
-    'Deals Created': 'dealsCreated',
-    'Deals Deleted': 'dealsDeleted',
-    'Deals Updated': 'dealsUpdated',
-    'Email Events Clicked': 'emEventsClicked',
-    'Email Events Opened': 'emEventsOpened',
-    'Email Events Unsubscribed': 'emEventsUnsubscribed',
-    'Emails Created': 'emailsCreated',
-    'Emails Deleted': 'emailsDeleted',
-    'Emails Updated': 'emailsUpdated',
-    'Events Created': 'eventsCreated',
-    'Notes Created': 'notesCreated',
-    'Notes Deleted': 'notesDeleted',
-    'Notes Updated': 'notesUpdated',
-    'People Created': 'peopleCreated',
-    'People Deleted': 'peopleDeleted',
-    'People Relationship Created': 'peopleRelationshipCreated',
-    'People Relationship Deleted': 'peopleRelationshipDeleted',
-    'People Relationship Updated': 'peopleRelationshipUpdated',
-    'People Stage Updated': 'peopleStageUpdated',
-    'People Tags Created': 'peopleTagsCreated',
-    'People Updated': 'peopleUpdated',
-    'Pipeline Created': 'pipelineCreated',
-    'Pipeline Deleted': 'pipelineDeleted',
-    'Pipeline Stage Created': 'pipelineStageCreated',
-    'Pipeline Stage Deleted': 'pipelineStageDeleted',
-    'Pipeline Stage Updated': 'pipelineStageUpdated',
-    'Pipeline Updated': 'pipelineUpdated',
-    'Reaction Created': 'reactionCreated',
-    'Reaction Deleted': 'reactionDeleted',
-    'Stage Created': 'stageCreated',
-    'Stage Deleted': 'stageDeleted',
-    'Stage Updated': 'stageUpdated',
-    'Tasks Created': 'tasksCreated',
-    'Tasks Deleted': 'tasksDeleted',
-    'Tasks Updated': 'tasksUpdated',
-    'Text Messages Created': 'textMessagesCreated',
-    'Text Messages Deleted': 'textMessagesDeleted',
-    'Text Messages Updated': 'textMessagesUpdated',
-    'Threaded Reply Created': 'threadedReplyCreated',
-    'Threaded Reply Deleted': 'threadedReplyDeleted',
-    'Threaded Reply Updated': 'threadedReplyUpdated',
-};
 
 export class FollowUpBossTrigger implements INodeType {
     description: INodeTypeDescription = {
@@ -79,9 +23,9 @@ export class FollowUpBossTrigger implements INodeType {
         icon: 'file:FollowUpBoss.svg',
         group: ['trigger'],
         version: 1,
-        subtitle: '={{$parameter["event"]}}{{$parameter["tagFilter"]?.tags ? ": " + $parameter["tagFilter"].tags.map(t=>t.name).join(", ") : ""}}{{$parameter["stageFilter"]?.length ? ": " + $parameter["stageFilter"].join(", ") : ""}}{{$parameter["refTypeFilter"]?.length ? ": " + $parameter["refTypeFilter"].join(", ") : ""}}',
+        subtitle: '={{$parameter["event"]}}',
         description: 'Handle Follow Up Boss events via webhooks',
-        documentationUrl: 'https://github.com/brian-conrya/n8n-nodes-followupboss/blob/main/README.md',
+        documentationUrl: 'https://github.com/brian-conrya/n8n-nodes-followupboss/blob/main/nodes/FollowUpBoss/FollowUpBossTrigger.md',
         defaults: {
             name: 'Follow Up Boss Trigger',
         },
@@ -105,7 +49,7 @@ export class FollowUpBossTrigger implements INodeType {
                 default: '',
             },
             {
-                displayName: 'Event',
+                displayName: 'Webhook Event',
                 name: 'event',
                 type: 'options',
                 options: [
@@ -165,85 +109,7 @@ export class FollowUpBossTrigger implements INodeType {
                 ],
                 default: 'People Created',
                 required: true,
-                description: 'The event to listen for',
-            },
-            {
-                displayName: 'Tag Filter',
-                name: 'tagFilter',
-                type: 'fixedCollection',
-                default: {},
-                typeOptions: {
-                    multipleValues: true,
-                },
-                displayOptions: {
-                    show: {
-                        event: ['People Tags Created'],
-                    },
-                },
-                description: 'Optional. If set, the workflow will only trigger when at least one of these specific tags is added.',
-                options: [
-                    {
-                        name: 'tags',
-                        displayName: 'Tags',
-                        values: [
-                            {
-                                displayName: 'Tag',
-                                name: 'name',
-                                type: 'string',
-                                default: '',
-                            },
-                        ],
-                    },
-                ],
-            },
-            {
-                displayName: 'Stage Names or IDs',
-                name: 'stageFilter',
-                type: 'multiOptions',
-                default: [],
-                typeOptions: {
-                    loadOptionsMethod: 'getStageNames',
-                },
-                displayOptions: {
-                    show: {
-                        event: ['People Stage Updated'],
-                    },
-                },
-                description: 'Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
-            },
-            {
-                displayName: 'Ref Type Filter',
-                name: 'refTypeFilter',
-                type: 'multiOptions',
-                default: [],
-                options: [
-                    { name: 'Note', value: 'Note' },
-                ],
-                displayOptions: {
-                    show: {
-                        event: ['Reaction Created', 'Reaction Deleted', 'Threaded Reply Created', 'Threaded Reply Deleted', 'Threaded Reply Updated'],
-                    },
-                },
-                description: 'If set, the workflow will only trigger when the reference type matches one of these values',
-            },
-            {
-                displayName: 'Output',
-                name: 'output',
-                type: 'options',
-                options: [
-                    {
-                        name: 'Event Data',
-                        value: 'eventData',
-                        description: 'Returns the enriched resource data (e.g. the Person object) if available, otherwise returns the raw event payload (e.g. for Deleted events).',
-                    },
-                    {
-                        name: 'Event',
-                        value: 'event',
-                        description: 'Returns the raw webhook payload. Useful for accessing delta details like added tags or new stage values.',
-                    },
-                ],
-                default: 'eventData',
-                description: 'Choose whether to return the enriched event data or the raw event payload. Note: Delete events will always return the raw event payload as the resource no longer exists.',
+                description: 'The webhook event to listen for',
             },
         ],
         usableAsTool: true,
@@ -256,7 +122,7 @@ export class FollowUpBossTrigger implements INodeType {
                 if (!webhookUrl) return false;
 
                 const eventDisplayName = this.getNodeParameter('event') as string;
-                const event = EVENT_TRIGGER_MAP[eventDisplayName];
+                const event = WEBHOOK_EVENT_MAP[eventDisplayName];
                 const currentMode = webhookUrl.includes('/webhook-test') ? 'test' : 'production';
 
                 const webhookData = this.getWorkflowStaticData('node');
@@ -320,7 +186,7 @@ export class FollowUpBossTrigger implements INodeType {
                 if (!webhookUrl) return false;
 
                 const eventDisplayName = this.getNodeParameter('event') as string;
-                const event = EVENT_TRIGGER_MAP[eventDisplayName];
+                const event = WEBHOOK_EVENT_MAP[eventDisplayName];
 
                 if (webhookUrl.includes('//localhost')) {
                     throw new NodeOperationError(
@@ -434,90 +300,16 @@ export class FollowUpBossTrigger implements INodeType {
         const body = req.body as IDataObject;
         const eventType = body.event as string;
         const eventDisplayName = this.getNodeParameter('event') as string;
-        const event = EVENT_TRIGGER_MAP[eventDisplayName];
+        const event = WEBHOOK_EVENT_MAP[eventDisplayName];
 
         // Event Matching
         if (event !== eventType) {
             return { workflowData: [] };
         }
 
-        // Tag Filtering
-        if (eventType === 'peopleTagsCreated') {
-            const tagFilter = this.getNodeParameter('tagFilter', {}) as IDataObject;
-            // Only filter if usage of tags is specified (optional filter)
-            if (tagFilter.tags) {
-                const data = body.data as IDataObject;
-                const tags = data.tags as string[];
-                const filterTagsList = tagFilter.tags as IDataObject[];
-                const filterTags = filterTagsList.map(t => t.name as string);
-
-                // Check if any of the received tags match any of the filter tags
-                const hasMatchingTag = tags && tags.some(tag => filterTags.includes(tag));
-
-                if (!hasMatchingTag) {
-                    return { workflowData: [] };
-                }
-            }
-        }
-
-        // Stage Filtering
-        if (eventType === 'peopleStageUpdated') {
-            const stageFilter = this.getNodeParameter('stageFilter', []) as string[];
-            // Only filter if stages are selected (optional filter)
-            if (stageFilter.length > 0) {
-                const data = body.data as IDataObject;
-                const stage = data.stage as string;
-
-                // Check if the received stage matches any of the filter stages
-                if (!stageFilter.includes(stage)) {
-                    return { workflowData: [] };
-                }
-            }
-        }
-
-        // RefType Filtering (for reactions and threaded replies)
-        const refTypeEvents = ['reactionCreated', 'reactionDeleted', 'threadedReplyCreated', 'threadedReplyDeleted', 'threadedReplyUpdated'];
-        if (refTypeEvents.includes(eventType)) {
-            const refTypeFilter = this.getNodeParameter('refTypeFilter', []) as string[];
-            if (refTypeFilter.length > 0) {
-                const data = body.data as IDataObject;
-                const refType = data?.refType as string | undefined;
-
-                // Check if the received refType matches any of the filter refTypes
-                if (!refType || !refTypeFilter.includes(refType)) {
-                    return { workflowData: [] };
-                }
-            }
-        }
-
-        // Enrich webhook data by fetching actual resource data
-        const uri = body.uri as string | null;
-        const output = this.getNodeParameter('output', 'eventData') as string;
-
-        if (output === 'event' || !uri) {
-            return {
-                workflowData: [wrapData(body)],
-            };
-        }
-
-        // output === 'eventData' && uri exists
-        // Extract the path from the URI (remove base URL and /v1 prefix)
-        const url = new URL(uri);
-        // Remove '/v1' prefix from pathname as apiRequest adds it
-        const endpoint = url.pathname.replace(/^\/v1/, '');
-
-        // Parse query string into object
-        const qs: IDataObject = {};
-        url.searchParams.forEach((value, key) => {
-            qs[key] = value;
-        });
-
-        // Fetch the actual resource data
-        const resourceData = await apiRequest.call(this, 'GET', endpoint, {}, qs);
-
-        // Return the resource data
+        // Return the raw webhook payload
         return {
-            workflowData: [wrapData(resourceData)],
+            workflowData: [wrapData(body)],
         };
     }
 }

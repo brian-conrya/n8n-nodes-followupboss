@@ -39,7 +39,8 @@
     ],
     "nodes": [
       "dist/nodes/FollowUpBoss/FollowUpBoss.node.js",
-      "dist/nodes/FollowUpBoss/FollowUpBossTrigger.node.js"
+      "dist/nodes/FollowUpBoss/FollowUpBossTrigger.node.js",
+      "dist/nodes/FollowUpBoss/FollowUpBossHandler.node.js"
     ]
   },
   "devDependencies": {
