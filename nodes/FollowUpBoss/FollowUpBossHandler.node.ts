@@ -18,7 +18,46 @@ export class FollowUpBossHandler implements INodeType {
         icon: 'file:FollowUpBoss.svg',
         group: ['transform'],
         version: 1,
-        subtitle: '={{$parameter["operation"]}}',
+        subtitle: `={{
+			(() => {
+				const op = $parameter["operation"];
+				const opNames = {
+					"webhookEvent": "Filter by Webhook Event",
+					"refTypeEvents": "Filter by Reference Type",
+					"peopleStageUpdated": "Filter by Stage",
+					"peopleTagsCreated": "Filter by Tags",
+					"hydrate": "Hydrate Webhook Data"
+				};
+				const opName = opNames[op] || op;
+				
+				if (op === "webhookEvent") {
+					const events = $parameter["webhookEventFilter"] || [];
+					const detail = events.length ? ": " + events.join(", ") : "";
+					return opName + detail;
+				}
+				if (op === "peopleTagsCreated") {
+					const mode = $parameter["tagsMode"];
+					if (mode === "manual") {
+						const tags = ($parameter["tagsManual"] || "").split("\\n").filter(t => t.trim());
+						const detail = tags.length ? ": " + tags.join(", ") : "";
+						return opName + detail;
+					} else {
+						return opName + ": (from expression)";
+					}
+				}
+				if (op === "peopleStageUpdated") {
+					const stages = $parameter["stageFilter"] || [];
+					const detail = stages.length ? ": " + stages.join(", ") : "";
+					return opName + detail;
+				}
+				if (op === "refTypeEvents") {
+					const types = $parameter["refTypeFilter"] || [];
+					const detail = types.length ? ": " + types.join(", ") : "";
+					return opName + detail;
+				}
+				return opName;
+			})()
+		}}`,
         description: 'Hydrates and filters Follow Up Boss webhook events',
         documentationUrl: 'https://github.com/brian-conrya/n8n-nodes-followupboss/blob/main/nodes/FollowUpBoss/FollowUpBossHandler.md',
         defaults: {
