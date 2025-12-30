@@ -11,7 +11,7 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		...getTextMessageTemplateIdProperty(true, 'id'),
+		...getTextMessageTemplateIdProperty(true, 'templateId'),
 		description:
 			'ID of the template to merge. Choose from the list, or specify an ID.',
 	},

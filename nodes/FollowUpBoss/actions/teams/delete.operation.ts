@@ -11,7 +11,7 @@ const displayOptions: IDisplayOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		...getTeamIdProperty(true, 'id'),
+		...getTeamIdProperty(),
 		description:
 			'ID of the team to delete. Choose from the list, or specify an ID.',
 	},
@@ -38,7 +38,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const idRaw = this.getNodeParameter('id', i) as string;
+	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Team ID', this.getNode(), i);
 	const qs: IDataObject = {};
 	const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;

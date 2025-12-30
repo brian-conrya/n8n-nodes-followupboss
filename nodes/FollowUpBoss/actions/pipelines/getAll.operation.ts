@@ -21,6 +21,7 @@ const resourceSpecificOptions: INodeProperties[] = [
 export const description: INodeProperties[] = createGetAllOperationDescription({
 	resource,
 	resourceSpecificOptions,
+	includeDates: false,
 });
 
 export async function execute(

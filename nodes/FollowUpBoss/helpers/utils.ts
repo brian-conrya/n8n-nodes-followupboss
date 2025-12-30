@@ -451,7 +451,7 @@ export function getCallIdProperty(required = true, name = 'id'): INodeProperties
 	});
 }
 
-export function getTeamIdProperty(required = true, name = 'teamId'): INodeProperties {
+export function getTeamIdProperty(required = true, name = 'id'): INodeProperties {
 	return getResourceLocatorProperty({
 		displayName: 'Team',
 		name,
@@ -486,6 +486,17 @@ export function getCustomFieldIdProperty(required = true, name = 'name'): INodeP
 		displayName: 'Custom Field',
 		name,
 		searchListMethod: 'getCustomFields',
+		isNumericId: true,
+		required,
+		searchable: false,
+	});
+}
+
+export function getCustomFieldNameProperty(required = true, name = 'name'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Custom Field',
+		name,
+		searchListMethod: 'getCustomFieldNames',
 		isNumericId: false,
 		required,
 		searchable: false,
@@ -497,6 +508,17 @@ export function getDealCustomFieldIdProperty(required = true, name = 'name'): IN
 		displayName: 'Deal Custom Field',
 		name,
 		searchListMethod: 'getDealCustomFields',
+		isNumericId: true,
+		required,
+		searchable: false,
+	});
+}
+
+export function getDealCustomFieldNameProperty(required = true, name = 'name'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Deal Custom Field',
+		name,
+		searchListMethod: 'getDealCustomFieldNames',
 		isNumericId: false,
 		required,
 		searchable: false,
@@ -777,6 +799,10 @@ export function createGetAllOperationDescription(
 
 export function wrapDeleteSuccess(): INodeExecutionData[] {
 	return [{ json: { deleted: true } }];
+}
+
+export function wrapCreateSuccess(): INodeExecutionData[] {
+	return [{ json: { created: true } }];
 }
 
 export function flattenPersonContactInfo(person: IDataObject): IDataObject {

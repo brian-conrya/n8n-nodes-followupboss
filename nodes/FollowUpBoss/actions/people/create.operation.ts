@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { updateDisplayOptions, wrapData, toFloat, getUserIdProperty, getPondIdProperty, toInt, getLenderIdProperty, getCustomFieldIdProperty, getTimeframeIdProperty, getStageIdProperty, getTagsProperty, normalizeTags } from '../../helpers/utils';
+import { updateDisplayOptions, wrapData, toFloat, getUserIdProperty, getPondIdProperty, toInt, getLenderIdProperty, getCustomFieldNameProperty, getTimeframeIdProperty, getStageIdProperty, getTagsProperty, normalizeTags } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -174,7 +174,7 @@ const properties: INodeProperties[] = [
 						displayName: 'Custom Field',
 						values: [
 							{
-								...getCustomFieldIdProperty(true, 'key'),
+								...getCustomFieldNameProperty(true, 'key'),
 								description:
 									'Name of the custom field (with or without "custom" prefix). Choose from the list, or specify an ID.',
 							},

@@ -16,28 +16,37 @@ const properties: INodeProperties[] = [
 		description: 'ID of the pipeline to update. Choose from the list, or specify an ID.',
 	},
 	{
-		displayName: 'Description',
-		name: 'description',
-		type: 'string',
-		default: '',
-		placeholder: 'A pipeline for buyers',
-		description: 'Description of the pipeline',
-	},
-	{
-		displayName: 'Name',
-		name: 'name',
-		type: 'string',
-		default: '',
-		placeholder: 'Buyer pipeline',
-		description: 'Name of the pipeline',
-	},
-	{
-		displayName: 'Order Weight',
-		name: 'orderWeight',
-		type: 'number',
-		default: 0,
-		placeholder: '1000',
-		description: 'Set this value to enforce a specific sort order',
+		displayName: 'Update Fields',
+		name: 'updateFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		options: [
+			{
+				displayName: 'Description',
+				name: 'description',
+				type: 'string',
+				default: '',
+				placeholder: 'A pipeline for buyers',
+				description: 'Description of the pipeline',
+			},
+			{
+				displayName: 'Name',
+				name: 'name',
+				type: 'string',
+				default: '',
+				placeholder: 'Buyer pipeline',
+				description: 'Name of the pipeline',
+			},
+			{
+				displayName: 'Order Weight',
+				name: 'orderWeight',
+				type: 'number',
+				default: 0,
+				placeholder: '1000',
+				description: 'Set this value to enforce a specific sort order',
+			},
+		],
 	},
 	{
 		displayName: 'Stages',
@@ -113,10 +122,11 @@ export async function execute(
 	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Pipeline ID', this.getNode(), i);
 
-	const description = this.getNodeParameter('description', i) as string;
-	const name = this.getNodeParameter('name', i) as string;
-	const orderWeight = this.getNodeParameter('orderWeight', i) as number;
-	const stagesData = this.getNodeParameter('stages', i) as IDataObject;
+	const updateFields = this.getNodeParameter('updateFields', i, {}) as IDataObject;
+	const description = updateFields.description as string;
+	const name = updateFields.name as string;
+	const orderWeight = updateFields.orderWeight as number;
+	const stagesData = this.getNodeParameter('stages', i, {}) as IDataObject;
 
 	const body: IDataObject = {};
 

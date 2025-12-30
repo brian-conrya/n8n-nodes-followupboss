@@ -12,7 +12,7 @@ import {
 	getPondIdProperty,
 	getLenderIdProperty,
 	getSmartListIdProperty,
-	getCustomFieldIdProperty,
+	getCustomFieldNameProperty,
 } from '../../helpers/utils';
 
 export const description: INodeProperties[] = [
@@ -168,7 +168,7 @@ export const description: INodeProperties[] = [
 						name: 'customField',
 						values: [
 							{
-								...getCustomFieldIdProperty(true, 'key'),
+								...getCustomFieldNameProperty(true, 'key'),
 								description: 'Name of the custom field (with or without "custom" prefix). Choose from the list, or specify an ID.',
 							},
 							{

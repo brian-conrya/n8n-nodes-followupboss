@@ -15,14 +15,52 @@ const properties: INodeProperties[] = [
 		description: 'The custom field to update. Choose from the list, or specify an ID.',
 	},
 	{
-		displayName: 'Choices',
-		name: 'choices',
-		type: 'string',
-		typeOptions: {
-			multipleValues: true,
-		},
-		default: [],
-		description: 'Array of options related to a custom field of type dropdown',
+		displayName: 'Update Fields',
+		name: 'updateFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		options: [
+			{
+				displayName: 'Choices',
+				name: 'choices',
+				type: 'string',
+				typeOptions: {
+					multipleValues: true,
+				},
+				default: [],
+				description: 'Array of options related to a custom field of type dropdown',
+			},
+			{
+				displayName: 'Hide If Empty',
+				name: 'hideIfEmpty',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to hide this field when viewing a person if it is empty',
+			},
+			{
+				displayName: 'Is Recurring',
+				name: 'isRecurring',
+				type: 'boolean',
+				default: false,
+				description: 'Whether a date field occurs every year (e.g. birthdays, anniversaries, etc.)',
+			},
+			{
+				displayName: 'Label',
+				name: 'label',
+				type: 'string',
+				default: '',
+				description: 'The user-friendly name of the custom field (e.g., "Anniversary")',
+			},
+			{
+				displayName: 'Order Weight',
+				name: 'orderWeight',
+				type: 'number',
+				default: 0,
+				placeholder: '0',
+				description: 'A weighted integer for the field to assign values for custom sorting',
+			},
+		],
 	},
 	{
 		displayName: 'Dropdown Choice Map',
@@ -56,35 +94,6 @@ const properties: INodeProperties[] = [
 			},
 		],
 	},
-	{
-		displayName: 'Hide If Empty',
-		name: 'hideIfEmpty',
-		type: 'boolean',
-		default: false,
-		description: 'Whether to hide this field when viewing a person if it is empty',
-	},
-	{
-		displayName: 'Is Recurring',
-		name: 'isRecurring',
-		type: 'boolean',
-		default: false,
-		description: 'Whether a date field occurs every year (e.g. birthdays, anniversaries, etc.)',
-	},
-	{
-		displayName: 'Label',
-		name: 'label',
-		type: 'string',
-		default: '',
-		description: 'The user-friendly name of the custom field (e.g., "Anniversary")',
-	},
-	{
-		displayName: 'Order Weight',
-		name: 'orderWeight',
-		type: 'number',
-		default: 0,
-		placeholder: '0',
-		description: 'A weighted integer for the field to assign values for custom sorting',
-	},
 ];
 
 export const description = updateDisplayOptions(displayOptions, properties);
@@ -95,12 +104,13 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Custom Field ID', this.getNode(), i);
-	const choices = this.getNodeParameter('choices', i) as string[];
-	const dropdownChoiceMapData = this.getNodeParameter('dropdownChoiceMap', i) as IDataObject;
-	const hideIfEmpty = this.getNodeParameter('hideIfEmpty', i) as boolean;
-	const isRecurring = this.getNodeParameter('isRecurring', i) as boolean;
-	const label = this.getNodeParameter('label', i) as string;
-	const orderWeight = this.getNodeParameter('orderWeight', i) as number;
+	const updateFields = this.getNodeParameter('updateFields', i, {}) as IDataObject;
+	const choices = updateFields.choices as string[];
+	const hideIfEmpty = updateFields.hideIfEmpty as boolean;
+	const isRecurring = updateFields.isRecurring as boolean;
+	const label = updateFields.label as string;
+	const orderWeight = updateFields.orderWeight as number;
+	const dropdownChoiceMapData = this.getNodeParameter('dropdownChoiceMap', i, {}) as IDataObject;
 
 	const body: IDataObject = {};
 

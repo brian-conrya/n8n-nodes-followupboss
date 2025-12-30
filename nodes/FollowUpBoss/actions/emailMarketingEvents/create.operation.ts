@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty, getUserIdProperty, getEmailMarketingCampaignIdProperty } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapCreateSuccess, getPersonIdProperty, getUserIdProperty, getEmailMarketingCampaignIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -110,6 +110,6 @@ export async function execute(
 		emEvents: [eventObject],
 	};
 
-	const response = await apiRequest.call(this, 'POST', '/emEvents', body);
-	return wrapData(response);
+	await apiRequest.call(this, 'POST', '/emEvents', body);
+	return wrapCreateSuccess();
 }

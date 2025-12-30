@@ -283,12 +283,36 @@ export async function getCustomFields(this: ILoadOptionsFunctions, _filter?: str
     const { data, nextUrl } = await apiRequestPagination.call(this, 'GET', '/customFields', {}, query, paginationToken);
     const mapped = data.map((item: IDataObject) => ({
         name: item.label as string,
+        value: item.id as number,
+    }));
+    return { results: mapped, paginationToken: nextUrl };
+}
+
+export async function getCustomFieldNames(this: ILoadOptionsFunctions, _filter?: string, paginationToken?: string): Promise<INodeListSearchResult> {
+    const query: IDataObject = {
+        sort: 'name',
+    };
+    const { data, nextUrl } = await apiRequestPagination.call(this, 'GET', '/customFields', {}, query, paginationToken);
+    const mapped = data.map((item: IDataObject) => ({
+        name: item.label as string,
         value: item.name as string,
     }));
     return { results: mapped, paginationToken: nextUrl };
 }
 
 export async function getDealCustomFields(this: ILoadOptionsFunctions, _filter?: string, paginationToken?: string): Promise<INodeListSearchResult> {
+    const query: IDataObject = {
+        sort: 'name',
+    };
+    const { data, nextUrl } = await apiRequestPagination.call(this, 'GET', '/dealCustomFields', {}, query, paginationToken);
+    const mapped = data.map((item: IDataObject) => ({
+        name: item.label as string,
+        value: item.id as number,
+    }));
+    return { results: mapped, paginationToken: nextUrl };
+}
+
+export async function getDealCustomFieldNames(this: ILoadOptionsFunctions, _filter?: string, paginationToken?: string): Promise<INodeListSearchResult> {
     const query: IDataObject = {
         sort: 'name',
     };

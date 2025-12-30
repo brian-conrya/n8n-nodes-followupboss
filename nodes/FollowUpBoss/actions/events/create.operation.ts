@@ -1,6 +1,6 @@
 import { IExecuteFunctions, INodeExecutionData, INodeProperties, IDataObject, IDisplayOptions } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toFloat, toInt, updateDisplayOptions, wrapData, getLenderIdProperty, getUserIdProperty, getPersonIdProperty, getCustomFieldIdProperty, getTagsProperty, normalizeTags } from '../../helpers/utils';
+import { toFloat, toInt, updateDisplayOptions, wrapData, getLenderIdProperty, getUserIdProperty, getPersonIdProperty, getCustomFieldNameProperty, getTagsProperty, normalizeTags } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -381,7 +381,7 @@ const properties: INodeProperties[] = [
 								displayName: 'Custom Field',
 								name: 'customField',
 								values: [
-									getCustomFieldIdProperty(),
+									getCustomFieldNameProperty(),
 									{
 										displayName: 'Value',
 										name: 'value',
