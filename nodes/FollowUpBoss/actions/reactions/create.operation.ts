@@ -17,12 +17,20 @@ const properties: INodeProperties[] = [
 		options: [
 			{
 				name: 'Note',
-				value: 'note',
+				value: 'Note',
+			},
+			{
+				name: 'Call',
+				value: 'Call',
+			},
+			{
+				name: 'Threaded Reply',
+				value: 'ThreadedReply',
 			},
 		],
-		default: 'note',
+		default: 'Note',
 		required: true,
-		description: 'Type of the reference',
+		description: 'The type of entity that is being reacted to',
 	},
 	{
 		...getNoteIdProperty(true, 'refId'),
@@ -33,8 +41,8 @@ const properties: INodeProperties[] = [
 		name: 'reactionType',
 		type: 'string',
 		default: '',
-		placeholder: 'e.g. Like',
-		description: 'Type of reaction (e.g., like, love)',
+		placeholder: 'e.g. 🤣',
+		description: 'The single-character emoji reaction',
 	},
 ];
 
@@ -51,7 +59,7 @@ export async function execute(
 
 	const body: IDataObject = {};
 	if (reactionType) {
-		body.reactionType = reactionType;
+		body.body = reactionType;
 	}
 
 	const response = await apiRequest.call(this, 'POST', `/reactions/${refType}/${refId}`, body);

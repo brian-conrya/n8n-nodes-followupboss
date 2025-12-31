@@ -17,12 +17,20 @@ const properties: INodeProperties[] = [
 		options: [
 			{
 				name: 'Note',
-				value: 'note',
+				value: 'Note',
+			},
+			{
+				name: 'Call',
+				value: 'Call',
+			},
+			{
+				name: 'Threaded Reply',
+				value: 'ThreadedReply',
 			},
 		],
-		default: 'note',
+		default: 'Note',
 		required: true,
-		description: 'Type of the reference',
+		description: 'The type of entity that is being reacted to',
 	},
 	{
 		...getNoteIdProperty(true, 'refId'),

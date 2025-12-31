@@ -183,6 +183,11 @@ const properties: INodeProperties[] = [
 				// eslint-disable-next-line n8n-nodes-base/node-param-fixed-collection-type-unsorted-items
 				values: [
 					{
+						...getPersonIdProperty(false, 'id'),
+						displayName: 'ID',
+						description: 'The ID of the person the event corresponds to. Choose from the list, or specify an ID.',
+					},
+					{
 						displayName: 'First Name',
 						name: 'firstName',
 						type: 'string',
@@ -391,11 +396,6 @@ const properties: INodeProperties[] = [
 								]
 							},
 						]
-					},
-					{
-						...getPersonIdProperty(false, 'id'),
-						displayName: 'ID',
-						description: 'The ID of the person the event corresponds to. Choose from the list, or specify an ID.',
 					},
 				],
 			},

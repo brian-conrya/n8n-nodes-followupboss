@@ -28,9 +28,9 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const pondIdRaw = this.getNodeParameter('pondId', i) as string;
+	const pondIdRaw = (this.getNodeParameter('pondId', i) as IDataObject).value as string;
 	const pondId = toInt(pondIdRaw, 'Pond ID', this.getNode(), i);
-	const assignToRaw = this.getNodeParameter('assignTo', i) as string;
+	const assignToRaw = (this.getNodeParameter('assignTo', i) as IDataObject).value as string;
 	const assignTo = toInt(assignToRaw, 'Assign To User ID', this.getNode(), i);
 	const qs: IDataObject = { assignTo };
 	await apiRequest.call(this, 'DELETE', `/ponds/${pondId}`, {}, qs);

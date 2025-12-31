@@ -15,21 +15,30 @@ const properties: INodeProperties[] = [
 		description: 'ID of the person. Choose from the list, or specify an ID.',
 	},
 	{
-		displayName: 'URL',
-		name: 'url',
+		displayName: 'URI',
+		name: 'uri',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. https://example.com/file.pdf',
-		description: 'URL of the attachment',
+		description: 'The URI of an externally hosted file',
 	},
 	{
-		displayName: 'Name',
-		name: 'name',
+		displayName: 'File Name',
+		name: 'fileName',
 		type: 'string',
 		default: '',
+		required: true,
 		placeholder: 'e.g. Contract.pdf',
-		description: 'Name of the attachment',
+		description: 'Name of the file',
+	},
+	{
+		displayName: 'File Size',
+		name: 'fileSize',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. 1024',
+		description: 'Size of the file in bytes',
 	},
 ];
 
@@ -41,12 +50,16 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const personIdRaw = (this.getNodeParameter('personId', i) as IDataObject).value as string;
 	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
-	const url = this.getNodeParameter('url', i) as string;
-	const name = this.getNodeParameter('name', i) as string;
-	const body: IDataObject = { personId, url };
-	if (name) {
-		body.name = name;
+	const uri = this.getNodeParameter('uri', i) as string;
+	const fileName = this.getNodeParameter('fileName', i) as string;
+	const fileSizeRaw = this.getNodeParameter('fileSize', i) as string;
+
+	const body: IDataObject = { personId, uri, fileName };
+
+	if (fileSizeRaw) {
+		body.fileSize = toInt(fileSizeRaw, 'File Size', this.getNode(), i);
 	}
+
 	const response = await apiRequest.call(this, 'POST', '/personAttachments', body);
 	return wrapData(response);
 }

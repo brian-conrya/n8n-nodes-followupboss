@@ -10,6 +10,7 @@ const resource = 'groups';
 
 export const description: INodeProperties[] = createGetAllOperationDescription({
 	resource,
+	includeDates: false,
 	resourceSpecificOptions: [
 		{
 			displayName: 'Type',

@@ -2,10 +2,10 @@ import { INodeProperties } from 'n8n-workflow';
 
 import * as create from './create.operation';
 import * as del from './delete.operation';
-import * as getAll from './getAll.operation';
+import * as get from './get.operation';
 import * as update from './update.operation';
 
-export { create, del as delete, getAll, update };
+export { create, del as delete, get, update };
 
 export const description: INodeProperties[] = [
     {
@@ -32,10 +32,10 @@ export const description: INodeProperties[] = [
                 action: 'Delete a person attachment',
             },
             {
-                name: 'Get Many',
-                value: 'getAll',
-                description: 'Retrieve a list of person attachments',
-                action: 'Get many person attachments',
+                name: 'Get',
+                value: 'get',
+                description: 'Retrieve a person attachment',
+                action: 'Get a person attachment',
             },
             {
                 name: 'Update',
@@ -48,6 +48,6 @@ export const description: INodeProperties[] = [
     },
     ...create.description,
     ...del.description,
-    ...getAll.description,
+    ...get.description,
     ...update.description,
 ];

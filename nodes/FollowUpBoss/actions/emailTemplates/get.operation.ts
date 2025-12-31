@@ -31,8 +31,8 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const idRaw = this.getNodeParameter('id', i) as string;
-	const id = toInt(idRaw, 'Email Template ID', this.getNode(), i);
+	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
+	const id = toInt(idRaw, 'Email Template ID', this.getNode(), i)
 	const mergePersonId = this.getNodeParameter('mergePersonId', i) as string;
 	const qs: IDataObject = {};
 	if (mergePersonId) {

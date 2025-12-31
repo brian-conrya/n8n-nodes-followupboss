@@ -12,7 +12,7 @@ const displayOptions: IDisplayOptions = {
 const properties: INodeProperties[] = [
 	{
 		...getPersonAttachmentIdProperty(true, 'id'),
-		description: 'ID of the attachment to update',
+		description: 'The ID of the attachment. Choose from the list, or specify an ID.',
 	},
 	{
 		...getPersonIdProperty(),
@@ -24,7 +24,8 @@ const properties: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		description: 'URI of an externally hosted file',
+		placeholder: 'e.g. https://example.com/file.pdf',
+		description: 'The URI of an externally hosted file',
 	},
 	{
 		displayName: 'File Name',
@@ -32,6 +33,7 @@ const properties: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
+		placeholder: 'e.g. Contract.pdf',
 		description: 'Name of the file',
 	},
 	{
@@ -39,6 +41,7 @@ const properties: INodeProperties[] = [
 		name: 'fileSize',
 		type: 'string',
 		default: '',
+		placeholder: 'e.g. 1024',
 		description: 'Size of the file in bytes',
 	},
 ];
