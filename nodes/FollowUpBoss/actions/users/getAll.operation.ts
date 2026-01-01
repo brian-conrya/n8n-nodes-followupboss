@@ -61,7 +61,7 @@ const resourceSpecificOptions: INodeProperties[] = [
             allowCustomValue: true,
         },
         default: 'Agent',
-        description: 'Find users by a specific role',
+        description: 'Find users by a specific role or a comma-separated list of roles (e.g. Broker,Agent)',
     },
 ];
 

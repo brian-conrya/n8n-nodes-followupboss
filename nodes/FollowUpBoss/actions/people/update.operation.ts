@@ -16,6 +16,13 @@ const properties: INodeProperties[] = [
 	},
 	...getTagsProperty(),
 	{
+		displayName: 'Merge Tags',
+		name: 'mergeTags',
+		type: 'boolean',
+		default: true,
+		description: 'Whether to merge tags with existing ones or overwrite them',
+	},
+	{
 		displayName: 'Update Fields',
 		name: 'updateFields',
 		type: 'collection',
@@ -192,13 +199,6 @@ const properties: INodeProperties[] = [
 				default: '',
 			},
 			{
-				displayName: 'Merge Tags',
-				name: 'mergeTags',
-				type: 'boolean',
-				default: false,
-				description: 'Whether to merge tags with existing ones',
-			},
-			{
 				displayName: 'Phones',
 				name: 'phonesUi',
 				placeholder: 'Add Phone',
@@ -272,6 +272,8 @@ export async function execute(
 		body.price = toFloat(updateFields.price as string, 'Price', this.getNode(), i);
 	}
 
+	const qs: IDataObject = {};
+
 	const tagsMode = this.getNodeParameter('tagsMode', i, 'manual') as string;
 	let tags: string[] = [];
 	if (tagsMode === 'manual') {
@@ -281,20 +283,25 @@ export async function execute(
 		const tagsJson = this.getNodeParameter('tagsJson', i, undefined);
 		tags = normalizeTags(tagsMode, undefined, tagsJson);
 	}
+
 	if (tags.length > 0) {
 		body.tags = tags;
 	}
-	delete body.tagsMode;
-	delete body.tagsManual;
-	delete body.tagsJson;
-	delete body.tagsUi;
+
+	const mergeTags = this.getNodeParameter('mergeTags', i, true) as boolean;
+	if (mergeTags) {
+		qs.mergeTags = true;
+	}
 
 	if (updateFields.customFieldsUi) {
 		const customFields = (updateFields.customFieldsUi as IDataObject)
 			.customFieldsValues as IDataObject[];
 		if (customFields) {
 			customFields.forEach((field) => {
-				const key = field.key as string;
+				let key = field.key as string;
+				if (typeof field.key === 'object' && field.key !== null) {
+					key = (field.key as IDataObject).value as string;
+				}
 				if (key.startsWith('custom')) {
 					body[key] = field.value;
 				} else {
@@ -327,12 +334,6 @@ export async function execute(
 			body.phones = phonesData.phonesValues;
 		}
 		delete body.phonesUi;
-	}
-
-	const qs: IDataObject = {};
-	if (updateFields.mergeTags) {
-		qs.mergeTags = true;
-		delete body.mergeTags;
 	}
 
 	const response = await apiRequest.call(this, 'PUT', `/people/${id}`, body, qs);
