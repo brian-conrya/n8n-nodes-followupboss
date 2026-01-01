@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
-import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty } from '../../helpers/utils';
+import { apiRequest, apiRequestAllItems } from '../../transport';
+import { toInt, updateDisplayOptions, getPersonIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -64,42 +64,30 @@ export async function execute(
 	const pauseMode = this.getNodeParameter('pauseMode', i) as string;
 
 	// Fetch all action plans for this person
-	const response = await apiRequest.call(this, 'GET', '/actionPlansPeople', {}, { personId });
-
-	const actionPlansPeople =
-		(response.actionPlans as IDataObject[]).length > 0
-			? (response.actionPlans as IDataObject[])
-			: [];
+	const actionPlansPeople = await apiRequestAllItems.call(this, '/actionPlansPeople', { personId });
 
 	// Filter action plans based on mode
 	let actionPlansToPause = actionPlansPeople;
 
 	if (pauseMode === 'specific') {
 		const actionPlanIds = this.getNodeParameter('actionPlanIds', i) as number[];
-		const activePlans = (actionPlansPeople as IDataObject[]).filter(
-			(plan: IDataObject) => plan.status === 'Active',
+		const runningPlans = (actionPlansPeople as IDataObject[]).filter(
+			(plan: IDataObject) => plan.status === 'Running',
 		);
-		actionPlansToPause = activePlans.filter((ap: IDataObject) =>
+		actionPlansToPause = runningPlans.filter((ap: IDataObject) =>
 			actionPlanIds.includes(ap.actionPlanId as number),
 		);
 	}
 
 	// Pause each action plan
-	const pausedActionPlans = [];
 	for (const actionPlan of actionPlansToPause) {
-		// Only pause if the action plan is not already paused or completed
-		if (actionPlan.status !== 'Paused' && actionPlan.status !== 'Completed') {
+		// Only pause if the action plan is running
+		if (actionPlan.status === 'Running') {
 			await apiRequest.call(this, 'PUT', `/actionPlansPeople/${actionPlan.id}`, {
 				status: 'Paused',
-			});
-			pausedActionPlans.push({
-				id: actionPlan.id,
-				actionPlanName: actionPlan.actionPlanName,
-				previousStatus: actionPlan.status,
-				newStatus: 'Paused',
 			});
 		}
 	}
 
-	return wrapData(pausedActionPlans);
+	return [{ json: { paused: true } }];
 }

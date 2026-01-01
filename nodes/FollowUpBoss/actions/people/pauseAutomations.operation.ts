@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
-import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty } from '../../helpers/utils';
+import { apiRequest, apiRequestAllItems } from '../../transport';
+import { toInt, updateDisplayOptions, getPersonIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -64,39 +64,30 @@ export async function execute(
 	const pauseMode = this.getNodeParameter('pauseMode', i) as string;
 
 	// Fetch all automations for this person
-	const response = await apiRequest.call(this, 'GET', '/automationsPeople', {}, { personId });
-
-	const automationsPeople = (response.automations as IDataObject[]) || [];
+	const automationsPeople = await apiRequestAllItems.call(this, '/automationsPeople', { personId });
 
 	// Filter automations based on mode
 	let automationsToPause = automationsPeople;
 
 	if (pauseMode === 'specific') {
 		const automationIds = this.getNodeParameter('automationIds', i) as number[];
-		const activeAutomations = automationsPeople.filter(
-			(automation: IDataObject) => automation.status === 'Active',
+		const runningAutomations = automationsPeople.filter(
+			(automation: IDataObject) => automation.status === 'Running',
 		);
-		automationsToPause = activeAutomations.filter((ap: IDataObject) =>
+		automationsToPause = runningAutomations.filter((ap: IDataObject) =>
 			automationIds.includes(ap.automationId as number),
 		);
 	}
 
 	// Pause each automation
-	const pausedAutomations = [];
 	for (const automation of automationsToPause) {
-		// Only pause if the automation is not already paused or completed
-		if (automation.status !== 'Paused' && automation.status !== 'Completed') {
+		// Only pause if the automation is running
+		if (automation.status === 'Running') {
 			await apiRequest.call(this, 'PUT', `/automationsPeople/${automation.id}`, {
 				status: 'Paused',
-			});
-			pausedAutomations.push({
-				id: automation.id,
-				automationName: automation.automationName,
-				previousStatus: automation.status,
-				newStatus: 'Paused',
 			});
 		}
 	}
 
-	return wrapData(pausedAutomations);
+	return [{ json: { paused: true } }];
 }
