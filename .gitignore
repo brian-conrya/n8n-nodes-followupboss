@@ -1,4 +1,24 @@
+# dependencies
+node_modules/
+
+# build
+dist/
+
+# n8n
 n8n-test-instance/
-node_modules
-dist
+
+# IDE
+.vscode/
+.idea/
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Git
+.github/workflows/
