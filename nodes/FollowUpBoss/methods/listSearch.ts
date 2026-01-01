@@ -126,7 +126,7 @@ export async function getUsers(this: ILoadOptionsFunctions, filter?: string): Pr
 }
 
 export async function getAgents(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
-    const results = await apiRequestAllItems.call(this, '/users', { role: 'Agent' });
+    const results = await apiRequestAllItems.call(this, '/users', { role: 'Broker,Agent' });
     let mapped = results.map((item: IDataObject) => ({
         name: item.name as string,
         value: item.id as number,

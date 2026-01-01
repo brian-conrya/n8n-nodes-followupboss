@@ -16,37 +16,40 @@ const properties: INodeProperties[] = [
 			'ID of the template to update. Choose from the list, or specify an ID.',
 	},
 	{
+		displayName: 'Name',
+		name: 'name',
+		type: 'string',
+		default: '',
+		required: true,
+		description: 'Name of the template',
+	},
+	{
+		displayName: 'Subject',
+		name: 'subject',
+		type: 'string',
+		default: '',
+		required: true,
+		description: 'Subject of the template',
+	},
+	{
+		displayName: 'Body HTML',
+		name: 'body',
+		type: 'string',
+		default: '',
+		required: true,
+		description: 'Body of the template',
+		typeOptions: {
+			rows: 5,
+			editor: 'htmlEditor',
+		},
+	},
+	{
 		displayName: 'Update Fields',
 		name: 'updateFields',
 		type: 'collection',
 		placeholder: 'Add Field',
 		default: {},
 		options: [
-			{
-				displayName: 'Name',
-				name: 'name',
-				type: 'string',
-				default: '',
-				description: 'Name of the template',
-			},
-			{
-				displayName: 'Subject',
-				name: 'subject',
-				type: 'string',
-				default: '',
-				description: 'Subject of the template',
-			},
-			{
-				displayName: 'Body HTML',
-				name: 'body',
-				type: 'string',
-				default: '',
-				description: 'Body of the template',
-				typeOptions: {
-					rows: 5,
-					editor: 'htmlEditor',
-				},
-			},
 			{
 				displayName: 'Is Shared',
 				name: 'isShared',
@@ -65,10 +68,22 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const idRaw = this.getNodeParameter('id', i) as string;
+	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Email Template ID', this.getNode(), i);
+
+	const name = this.getNodeParameter('name', i) as string;
+	const subject = this.getNodeParameter('subject', i) as string;
+	const bodyContent = this.getNodeParameter('body', i) as string;
+
 	const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
-	const body = { ...updateFields };
+
+	const body = {
+		name,
+		subject,
+		body: bodyContent,
+		...updateFields,
+	};
+
 	const response = await apiRequest.call(this, 'PUT', `/templates/${id}`, body);
 	return wrapData(response);
 }
