@@ -21,4 +21,4 @@ yarn-debug.log*
 yarn-error.log*
 
 # Git
-.github/workflows/
+# .github/workflows/ (removed to allow tracking)
