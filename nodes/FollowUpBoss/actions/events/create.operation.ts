@@ -745,27 +745,39 @@ export async function execute(
 
 		if (personObject.assignedLenderId) {
 			const assignedLenderIdRaw = (personObject.assignedLenderId as IDataObject).value as string;
-			personObject.assignedLenderId = toInt(
-				assignedLenderIdRaw,
-				'Assigned Lender ID',
-				this.getNode(),
-				i,
-			);
+			if (assignedLenderIdRaw) {
+				personObject.assignedLenderId = toInt(
+					assignedLenderIdRaw,
+					'Assigned Lender ID',
+					this.getNode(),
+					i,
+				);
+			} else {
+				delete personObject.assignedLenderId;
+			}
 		}
 
 		if (personObject.assignedUserId) {
 			const assignedUserIdRaw = (personObject.assignedUserId as IDataObject).value as string;
-			personObject.assignedUserId = toInt(
-				assignedUserIdRaw,
-				'Assigned User ID',
-				this.getNode(),
-				i,
-			);
+			if (assignedUserIdRaw) {
+				personObject.assignedUserId = toInt(
+					assignedUserIdRaw,
+					'Assigned User ID',
+					this.getNode(),
+					i,
+				);
+			} else {
+				delete personObject.assignedUserId;
+			}
 		}
 
 		if (personObject.id) {
 			const personIdRaw = (personObject.id as IDataObject).value as string;
-			personObject.id = toInt(personIdRaw, 'ID', this.getNode(), i);
+			if (personIdRaw) {
+				personObject.id = toInt(personIdRaw, 'ID', this.getNode(), i);
+			} else {
+				delete personObject.id;
+			}
 		}
 
 		if (personDetails.emails) {
@@ -809,7 +821,9 @@ export async function execute(
 				(customFields.customField as IDataObject[]).forEach((field) => {
 					if (field.name) {
 						const fieldNameRaw = (field.name as IDataObject).value as string;
-						personObject[fieldNameRaw] = field.value;
+						if (fieldNameRaw) {
+							personObject[fieldNameRaw] = field.value;
+						}
 					}
 				});
 			}
