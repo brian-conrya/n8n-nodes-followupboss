@@ -1,6 +1,17 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getEmailTemplateIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getEmailTemplateIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -12,8 +23,7 @@ const displayOptions: IDisplayOptions = {
 const properties: INodeProperties[] = [
 	{
 		...getEmailTemplateIdProperty(true, 'id'),
-		description:
-			'ID of the template to update. Choose from the list, or specify an ID.',
+		description: 'ID of the template to update. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Name',
@@ -64,10 +74,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Email Template ID', this.getNode(), i);
 

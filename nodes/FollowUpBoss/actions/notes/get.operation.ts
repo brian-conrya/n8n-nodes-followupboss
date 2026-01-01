@@ -1,4 +1,10 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
 import { toInt, updateDisplayOptions, wrapData, getNoteIdProperty } from '../../helpers/utils';
 
@@ -38,10 +44,7 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const noteIdRaw = this.getNodeParameter('noteId', index) as string;
 	const noteId = toInt(noteIdRaw, 'Note ID', this.getNode(), index);
-	const includeThreadedReplies = this.getNodeParameter(
-		'includeThreadedReplies',
-		index,
-	) as boolean;
+	const includeThreadedReplies = this.getNodeParameter('includeThreadedReplies', index) as boolean;
 	const includeReactions = this.getNodeParameter('includeReactions', index) as boolean;
 
 	const qs: IDataObject = {};

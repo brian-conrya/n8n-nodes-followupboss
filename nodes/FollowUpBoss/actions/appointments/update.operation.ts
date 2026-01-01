@@ -1,6 +1,19 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getAppointmentIdProperty, getAppointmentOutcomeIdProperty, getAppointmentTypeIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getAppointmentIdProperty,
+	getAppointmentOutcomeIdProperty,
+	getAppointmentTypeIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -105,8 +118,7 @@ const properties: INodeProperties[] = [
 			},
 			{
 				...getAppointmentOutcomeIdProperty(false, 'outcomeId'),
-				description:
-					'ID of the appointment outcome. Choose from the list, or specify an ID.',
+				description: 'ID of the appointment outcome. Choose from the list, or specify an ID.',
 			},
 		],
 	},
@@ -118,7 +130,8 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const appointmentIdRaw = (this.getNodeParameter('appointmentId', index) as IDataObject).value as string;
+	const appointmentIdRaw = (this.getNodeParameter('appointmentId', index) as IDataObject)
+		.value as string;
 	const appointmentId = toInt(appointmentIdRaw, 'Appointment ID', this.getNode(), index);
 	const start = this.getNodeParameter('start', index) as string;
 	const end = this.getNodeParameter('end', index) as string;
@@ -146,14 +159,18 @@ export async function execute(
 			.split(',')
 			.map((s) => s.trim())
 			.filter(Boolean)
-			.forEach((userId) => invitees.push({ userId: toInt(userId, 'User ID', this.getNode(), index) }));
+			.forEach((userId) =>
+				invitees.push({ userId: toInt(userId, 'User ID', this.getNode(), index) }),
+			);
 	}
 	if (updateFields.inviteePersonIds) {
 		(updateFields.inviteePersonIds as string)
 			.split(',')
 			.map((s) => s.trim())
 			.filter(Boolean)
-			.forEach((personId) => invitees.push({ personId: toInt(personId, 'Person ID', this.getNode(), index) }));
+			.forEach((personId) =>
+				invitees.push({ personId: toInt(personId, 'Person ID', this.getNode(), index) }),
+			);
 	}
 	if (updateFields.inviteeRelationshipIds) {
 		(updateFields.inviteeRelationshipIds as string)
@@ -161,7 +178,9 @@ export async function execute(
 			.map((s) => s.trim())
 			.filter(Boolean)
 			.forEach((relationshipId) =>
-				invitees.push({ relationshipId: toInt(relationshipId, 'Relationship ID', this.getNode(), index) }),
+				invitees.push({
+					relationshipId: toInt(relationshipId, 'Relationship ID', this.getNode(), index),
+				}),
 			);
 	}
 	if (updateFields.inviteeEmails) {

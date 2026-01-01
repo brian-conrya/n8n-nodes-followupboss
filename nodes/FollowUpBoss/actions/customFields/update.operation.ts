@@ -1,6 +1,17 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getCustomFieldIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getCustomFieldIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -70,7 +81,8 @@ const properties: INodeProperties[] = [
 			multipleValues: true,
 		},
 		default: {},
-		description: 'An optional mapping that points previous dropdown choices (keys) to their new positions (values). This is used to track when options get moved or renamed. If items are missing from the keys, they will be removed.',
+		description:
+			'An optional mapping that points previous dropdown choices (keys) to their new positions (values). This is used to track when options get moved or renamed. If items are missing from the keys, they will be removed.',
 		options: [
 			{
 				displayName: 'Mappings',
@@ -98,10 +110,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Custom Field ID', this.getNode(), i);
 	const updateFields = this.getNodeParameter('updateFields', i, {}) as IDataObject;
@@ -148,4 +157,3 @@ export async function execute(
 	const response = await apiRequest.call(this, 'PUT', `/customFields/${id}`, body);
 	return wrapData(response);
 }
-

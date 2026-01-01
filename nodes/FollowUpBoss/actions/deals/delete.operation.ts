@@ -1,6 +1,17 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapDeleteSuccess, getDealIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapDeleteSuccess,
+	getDealIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {

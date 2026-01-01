@@ -1,6 +1,26 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, toFloat, getPersonIdProperty, getLenderIdProperty, getPondIdProperty, getUserIdProperty, getCustomFieldNameProperty, getStageIdProperty, getTimeframeIdProperty, getTagsProperty, normalizeTags } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	toFloat,
+	getPersonIdProperty,
+	getLenderIdProperty,
+	getPondIdProperty,
+	getUserIdProperty,
+	getCustomFieldNameProperty,
+	getStageIdProperty,
+	getTimeframeIdProperty,
+	getTagsProperty,
+	normalizeTags,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -92,19 +112,16 @@ const properties: INodeProperties[] = [
 			},
 			{
 				...getLenderIdProperty('Assigned Lender', 'assignedLenderId', false),
-				description:
-					'Lender assigned to this person. Choose from the list, or specify an ID.',
+				description: 'Lender assigned to this person. Choose from the list, or specify an ID.',
 			},
 			{
 				...getPondIdProperty(false),
 				name: 'assignedPondId',
-				description:
-					'Pond assigned to this person. Choose from the list, or specify an ID.',
+				description: 'Pond assigned to this person. Choose from the list, or specify an ID.',
 			},
 			{
 				...getUserIdProperty('Assigned User', 'assignedUserId', false),
-				description:
-					'Agent assigned to this person. Choose from the list, or specify an ID.',
+				description: 'Agent assigned to this person. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Background',
@@ -243,8 +260,7 @@ const properties: INodeProperties[] = [
 			},
 			{
 				...getStageIdProperty(false, 'stage'),
-				description:
-					'The stage the person is in. Choose from the list, or specify a stage name.',
+				description: 'The stage the person is in. Choose from the list, or specify a stage name.',
 			},
 			{
 				...getTimeframeIdProperty(false, 'timeframeId'),
@@ -256,10 +272,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Person ID', this.getNode(), i);
 	const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;

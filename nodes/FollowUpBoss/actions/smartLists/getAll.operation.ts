@@ -14,7 +14,8 @@ const resourceSpecificOptions: INodeProperties[] = [
 		name: 'fub2',
 		type: 'boolean',
 		default: true,
-		description: 'Whether to return Smart Lists created in the current version of the UI. By default, only Smart Lists created in the classic version are returned.',
+		description:
+			'Whether to return Smart Lists created in the current version of the UI. By default, only Smart Lists created in the classic version are returned.',
 	},
 	{
 		displayName: 'All',
@@ -30,10 +31,7 @@ export const description: INodeProperties[] = createGetAllOperationDescription({
 	resourceSpecificOptions,
 });
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 	const options = this.getNodeParameter('options', i, {}) as IDataObject;
 	const qs: IDataObject = {};

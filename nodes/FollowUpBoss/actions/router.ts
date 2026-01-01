@@ -80,7 +80,9 @@ export async function router(this: IExecuteFunctions): Promise<INodeExecutionDat
 	const resource = this.getNodeParameter('resource', 0) as string;
 	const operation = this.getNodeParameter('operation', 0) as string;
 
-	const resourceData = followUpBossNodeData[resource as keyof typeof followUpBossNodeData] as unknown as {
+	const resourceData = followUpBossNodeData[
+		resource as keyof typeof followUpBossNodeData
+	] as unknown as {
 		[key: string]: {
 			execute: (this: IExecuteFunctions, index: number) => Promise<INodeExecutionData[]>;
 		};

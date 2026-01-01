@@ -1,6 +1,18 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getPondIdProperty, getUserIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getPondIdProperty,
+	getUserIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -30,7 +42,8 @@ const properties: INodeProperties[] = [
 			},
 			{
 				...getUserIdProperty('Lead Agent', 'userId', false),
-				description: 'Set this value to change the Pond Lead Agent. Choose from the list, or specify an ID.',
+				description:
+					'Set this value to change the Pond Lead Agent. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'User Names or IDs',
@@ -49,10 +62,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const pondIdRaw = (this.getNodeParameter('pondId', i) as IDataObject).value as string;
 	const pondId = toInt(pondIdRaw, 'Pond ID', this.getNode(), i);
 	const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;

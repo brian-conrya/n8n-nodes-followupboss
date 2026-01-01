@@ -10,7 +10,8 @@ export class FollowUpBossApi implements ICredentialType {
 
 	displayName = 'Follow Up Boss API';
 
-	documentationUrl = 'https://github.com/brian-conrya/n8n-nodes-followupboss/blob/main/credentials/FollowUpBossApi.credentials.md';
+	documentationUrl =
+		'https://github.com/brian-conrya/n8n-nodes-followupboss/blob/main/credentials/FollowUpBossApi.credentials.md';
 
 	icon = 'file:FollowUpBoss.svg' as const;
 
@@ -30,7 +31,8 @@ export class FollowUpBossApi implements ICredentialType {
 			type: 'string',
 			required: true,
 			default: '',
-			description: 'The name of the registered system (e.g. "MyN8nIntegration"). Required for webhooks.',
+			description:
+				'The name of the registered system (e.g. "MyN8nIntegration"). Required for webhooks.',
 		},
 		{
 			displayName: 'System Key (X-System-Key)',
@@ -39,7 +41,8 @@ export class FollowUpBossApi implements ICredentialType {
 			typeOptions: { password: true },
 			required: true,
 			default: '',
-			description: 'The secret key identifying the system. Required for webhook signature verification and higher rate limits.',
+			description:
+				'The secret key identifying the system. Required for webhook signature verification and higher rate limits.',
 		},
 	];
 

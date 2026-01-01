@@ -1,6 +1,23 @@
-import { IExecuteFunctions, INodeExecutionData, INodeProperties, IDataObject, IDisplayOptions } from 'n8n-workflow';
+import {
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+	IDataObject,
+	IDisplayOptions,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toFloat, toInt, updateDisplayOptions, wrapData, getLenderIdProperty, getUserIdProperty, getPersonIdProperty, getCustomFieldNameProperty, getTagsProperty, normalizeTags } from '../../helpers/utils';
+import {
+	toFloat,
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getLenderIdProperty,
+	getUserIdProperty,
+	getPersonIdProperty,
+	getCustomFieldNameProperty,
+	getTagsProperty,
+	normalizeTags,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -185,7 +202,8 @@ const properties: INodeProperties[] = [
 					{
 						...getPersonIdProperty(false, 'id'),
 						displayName: 'ID',
-						description: 'The ID of the person the event corresponds to. Choose from the list, or specify an ID.',
+						description:
+							'The ID of the person the event corresponds to. Choose from the list, or specify an ID.',
 					},
 					{
 						displayName: 'First Name',
@@ -226,9 +244,9 @@ const properties: INodeProperties[] = [
 										default: '',
 										placeholder: 'home',
 									},
-								]
+								],
 							},
-						]
+						],
 					},
 					{
 						displayName: 'Phones',
@@ -255,9 +273,9 @@ const properties: INodeProperties[] = [
 										default: '',
 										placeholder: 'mobile',
 									},
-								]
+								],
 							},
-						]
+						],
 					},
 					{
 						displayName: 'Stage',
@@ -265,7 +283,8 @@ const properties: INodeProperties[] = [
 						type: 'string',
 						default: '',
 						placeholder: 'Lead',
-						description: 'The stage of the person. (e.g., Lead or Trash See stages API endpoint for more options.).',
+						description:
+							'The stage of the person. (e.g., Lead or Trash See stages API endpoint for more options.).',
 					},
 					{
 						displayName: 'Source',
@@ -343,9 +362,9 @@ const properties: INodeProperties[] = [
 										default: '',
 										placeholder: 'home',
 									},
-								]
+								],
 							},
-						]
+						],
 					},
 					...getTagsProperty(),
 					{
@@ -393,9 +412,9 @@ const properties: INodeProperties[] = [
 										type: 'string',
 										default: '',
 									},
-								]
+								],
 							},
-						]
+						],
 					},
 				],
 			},
@@ -500,7 +519,8 @@ const properties: INodeProperties[] = [
 						name: 'url',
 						type: 'string',
 						default: '',
-						placeholder: 'http://www.zillow.com/homedetails/6825-Mulholland-Dr-Los-Angeles-CA-90068/2109065822_zpid/',
+						placeholder:
+							'http://www.zillow.com/homedetails/6825-Mulholland-Dr-Los-Angeles-CA-90068/2109065822_zpid/',
 					},
 				],
 			},
@@ -674,15 +694,11 @@ const properties: INodeProperties[] = [
 			},
 		],
 	},
-
 ];
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const type = this.getNodeParameter('type', i) as string;
 	const message = this.getNodeParameter('message', i) as string;
 	const description = this.getNodeParameter('description', i) as string;
@@ -700,8 +716,12 @@ export async function execute(
 		pageUrl = this.getNodeParameter('pageUrl', i, '') as string;
 		pageReferrer = this.getNodeParameter('pageReferrer', i, '') as string;
 		pageDuration =
-			toFloat(this.getNodeParameter('pageDuration', i, '') as string, 'Page Duration', this.getNode(), i) ||
-			null;
+			toFloat(
+				this.getNodeParameter('pageDuration', i, '') as string,
+				'Page Duration',
+				this.getNode(),
+				i,
+			) || null;
 	}
 
 	const person = this.getNodeParameter('person', i) as IDataObject;

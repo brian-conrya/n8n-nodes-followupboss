@@ -1,7 +1,19 @@
-import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import type { IDataObject } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { updateDisplayOptions, wrapData, toInt, getGroupIdProperty, getUserIdProperty, getPondIdProperty } from '../../helpers/utils';
+import {
+	updateDisplayOptions,
+	wrapData,
+	toInt,
+	getGroupIdProperty,
+	getUserIdProperty,
+	getPondIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -31,7 +43,8 @@ const properties: INodeProperties[] = [
 			loadOptionsMethod: 'getUsers',
 		},
 		default: [],
-		description: 'A list of user IDs that will be members of this group. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description:
+			'A list of user IDs that will be members of this group. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Distribution',
@@ -115,10 +128,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Group ID', this.getNode(), i);
 	const name = this.getNodeParameter('name', i) as string;
@@ -139,17 +149,23 @@ export async function execute(
 		const claimWindow = toInt(claimWindowRaw, 'Claim Window', this.getNode(), i);
 		if (claimWindow) body.claimWindow = claimWindow;
 
-		const defaultGroupIdRaw = (this.getNodeParameter('defaultGroupId', i, { value: '' }) as IDataObject).value as string;
+		const defaultGroupIdRaw = (
+			this.getNodeParameter('defaultGroupId', i, { value: '' }) as IDataObject
+		).value as string;
 		if (defaultGroupIdRaw) {
 			body.defaultGroupId = toInt(defaultGroupIdRaw, 'Default Group ID', this.getNode(), i);
 		}
 
-		const defaultPondIdRaw = (this.getNodeParameter('defaultPondId', i, { value: '' }) as IDataObject).value as string;
+		const defaultPondIdRaw = (
+			this.getNodeParameter('defaultPondId', i, { value: '' }) as IDataObject
+		).value as string;
 		if (defaultPondIdRaw) {
 			body.defaultPondId = toInt(defaultPondIdRaw, 'Default Pond ID', this.getNode(), i);
 		}
 
-		const defaultUserIdRaw = (this.getNodeParameter('defaultUserId', i, { value: '' }) as IDataObject).value as string;
+		const defaultUserIdRaw = (
+			this.getNodeParameter('defaultUserId', i, { value: '' }) as IDataObject
+		).value as string;
 		if (defaultUserIdRaw) {
 			body.defaultUserId = toInt(defaultUserIdRaw, 'Default User ID', this.getNode(), i);
 		}

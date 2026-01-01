@@ -20,11 +20,13 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 This package provides three nodes for working with Follow Up Boss:
 
 ### Follow Up Boss
+
 The main node for API operations - create, read, update, and delete resources.
 
 **[Full Documentation](nodes/FollowUpBoss/FollowUpBoss.md)**
 
 Supported resources include:
+
 - People, Deals, Tasks, Notes
 - Calls, Appointments, Events
 - Action Plans, Automations
@@ -32,6 +34,7 @@ Supported resources include:
 - And more...
 
 ### Follow Up Boss Trigger
+
 Listens for webhook events from Follow Up Boss and outputs raw payload data.
 
 **[Full Documentation](nodes/FollowUpBoss/FollowUpBossTrigger.md)**
@@ -39,11 +42,13 @@ Listens for webhook events from Follow Up Boss and outputs raw payload data.
 Use as the entry point for webhook-based workflows. Supports all Follow Up Boss webhook event types.
 
 ### Follow Up Boss Handler
+
 Processes webhook events with data hydration and pre-hydration filtering.
 
 **[Full Documentation](nodes/FollowUpBoss/FollowUpBossHandler.md)**
 
 Place downstream from the Trigger to:
+
 - Fetch full resource data from the API
 - Filter events before hydration to save API calls
 - Support filtering by webhook event type, tags, stages, and more

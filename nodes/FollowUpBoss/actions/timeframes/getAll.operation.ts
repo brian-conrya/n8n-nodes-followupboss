@@ -7,10 +7,10 @@ const resource = 'timeframes';
 export const description: INodeProperties[] = [];
 
 export async function execute(
-    this: IExecuteFunctions,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    i: number,
+	this: IExecuteFunctions,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	i: number,
 ): Promise<INodeExecutionData[]> {
-    const response = await apiRequestAllItems.call(this, `/${resource}`);
-    return wrapData(response);
+	const response = await apiRequestAllItems.call(this, `/${resource}`);
+	return wrapData(response);
 }

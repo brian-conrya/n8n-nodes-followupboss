@@ -1,6 +1,18 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getEmailTemplateIdProperty, getPersonIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getEmailTemplateIdProperty,
+	getPersonIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -19,7 +31,8 @@ const properties: INodeProperties[] = [
 		displayName: 'Merge Person',
 		name: 'mergePersonId',
 		required: false,
-		description: 'Person ID to use for merge fields like %contact_name%. Choose from the list, or specify an ID.',
+		description:
+			'Person ID to use for merge fields like %contact_name%. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Recipients',
@@ -55,13 +68,11 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const templateIdRaw = (this.getNodeParameter('templateId', i) as IDataObject).value as string;
 	const templateId = toInt(templateIdRaw, 'Email Template ID', this.getNode(), i);
-	const mergePersonIdRaw = (this.getNodeParameter('mergePersonId', i, { value: '' }) as IDataObject).value as string;
+	const mergePersonIdRaw = (this.getNodeParameter('mergePersonId', i, { value: '' }) as IDataObject)
+		.value as string;
 	const recipients = this.getNodeParameter('recipients', i) as IDataObject;
 
 	const body: IDataObject = { templateId };

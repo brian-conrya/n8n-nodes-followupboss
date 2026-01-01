@@ -1,6 +1,18 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getDealIdProperty, getPipelineStageIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getDealIdProperty,
+	getPipelineStageIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -124,7 +136,8 @@ const properties: INodeProperties[] = [
 			{
 				...getPipelineStageIdProperty(false),
 				name: 'stageId',
-				description: 'The pipeline stage that this deal should be assigned to. Choose from the list, or specify an ID.',
+				description:
+					'The pipeline stage that this deal should be assigned to. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Team Commission',
@@ -142,7 +155,8 @@ const properties: INodeProperties[] = [
 					loadOptionsMethod: 'getUsers',
 				},
 				default: [],
-				description: 'A list of user IDs that should be part of this deal. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				description:
+					'A list of user IDs that should be part of this deal. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 		],
 	},
@@ -161,17 +175,29 @@ export async function execute(
 	const body: IDataObject = { ...updateFields };
 
 	if (body.agentCommission) {
-		body.agentCommission = toInt(body.agentCommission as string, 'Agent Commission', this.getNode(), index);
+		body.agentCommission = toInt(
+			body.agentCommission as string,
+			'Agent Commission',
+			this.getNode(),
+			index,
+		);
 	}
 	if (body.commissionValue) {
-		body.commissionValue = toInt(body.commissionValue as string, 'Commission Value', this.getNode(), index);
+		body.commissionValue = toInt(
+			body.commissionValue as string,
+			'Commission Value',
+			this.getNode(),
+			index,
+		);
 	}
 	if (body.orderWeight) {
 		body.orderWeight = toInt(body.orderWeight as string, 'Order Weight', this.getNode(), index);
 	}
 	if (body.peopleIds) {
 		const peopleIdsRaw = body.peopleIds as string;
-		body.peopleIds = peopleIdsRaw.split(',').map(id => toInt(id.trim(), 'People ID', this.getNode(), index));
+		body.peopleIds = peopleIdsRaw
+			.split(',')
+			.map((id) => toInt(id.trim(), 'People ID', this.getNode(), index));
 	}
 	if (body.price) {
 		body.price = toInt(body.price as string, 'Price', this.getNode(), index);
@@ -181,15 +207,18 @@ export async function execute(
 		body.stageId = toInt(stageIdRaw, 'Stage ID', this.getNode(), index);
 	}
 	if (body.teamCommission) {
-		body.teamCommission = toInt(body.teamCommission as string, 'Team Commission', this.getNode(), index);
+		body.teamCommission = toInt(
+			body.teamCommission as string,
+			'Team Commission',
+			this.getNode(),
+			index,
+		);
 	}
 	if (body.userIds) {
 		const userIds = body.userIds as string[];
-		body.userIds = userIds.map(id => toInt(id as string, 'User ID', this.getNode(), index));
+		body.userIds = userIds.map((id) => toInt(id as string, 'User ID', this.getNode(), index));
 	}
 
 	const response = await apiRequest.call(this, 'PUT', `/deals/${dealId}`, body);
 	return wrapData(response);
 }
-
-

@@ -24,10 +24,7 @@ export const description: INodeProperties[] = createGetAllOperationDescription({
 	includeDates: false,
 });
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 	const options = this.getNodeParameter('options', i, {}) as IDataObject;
 	const qs: IDataObject = {};
@@ -44,4 +41,3 @@ export async function execute(
 
 	return wrapData(fields);
 }
-

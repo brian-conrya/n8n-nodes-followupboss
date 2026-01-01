@@ -1,6 +1,17 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getAutomationPersonAssignmentIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getAutomationPersonAssignmentIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -30,16 +41,14 @@ const properties: INodeProperties[] = [
 		],
 		default: 'Running',
 		required: true,
-		description: 'Automation Status, i.e. "Paused" to pause the Automation or "Running" to unpause it.',
+		description:
+			'Automation Status, i.e. "Paused" to pause the Automation or "Running" to unpause it.',
 	},
 ];
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Assignment ID', this.getNode(), i);
 	const status = this.getNodeParameter('status', i) as string;

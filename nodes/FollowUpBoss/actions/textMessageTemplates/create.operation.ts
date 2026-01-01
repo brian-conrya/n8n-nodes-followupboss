@@ -1,4 +1,9 @@
-import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
 import { updateDisplayOptions, wrapData } from '../../helpers/utils';
 
@@ -25,7 +30,8 @@ const properties: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. %greeting_time%, %contact_first_name% Check out this beach house: https://example.com',
+		placeholder:
+			'e.g. %greeting_time%, %contact_first_name% Check out this beach house: https://example.com',
 		description: 'The body of your text message template',
 	},
 	{
@@ -40,10 +46,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const name = this.getNodeParameter('name', i) as string;
 	const message = this.getNodeParameter('message', i) as string;
 	const isShared = this.getNodeParameter('isShared', i) as boolean;

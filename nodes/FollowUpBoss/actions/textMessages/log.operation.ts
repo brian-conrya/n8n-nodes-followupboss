@@ -1,4 +1,10 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
 import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty } from '../../helpers/utils';
 
@@ -12,7 +18,8 @@ const displayOptions: IDisplayOptions = {
 const properties: INodeProperties[] = [
 	{
 		...getPersonIdProperty(),
-		description: 'The ID of the person associated with the text message. Choose from the list, or specify an ID.',
+		description:
+			'The ID of the person associated with the text message. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Message',
@@ -79,10 +86,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const personIdRaw = (this.getNodeParameter('personId', i) as IDataObject).value as string;
 	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	const message = this.getNodeParameter('message', i) as string;

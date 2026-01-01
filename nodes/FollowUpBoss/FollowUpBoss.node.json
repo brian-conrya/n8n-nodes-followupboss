@@ -2,11 +2,7 @@
 	"node": "n8n-nodes-followupboss",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": [
-		"Sales",
-		"Marketing & Content",
-		"Communication"
-	],
+	"categories": ["Sales", "Marketing & Content", "Communication"],
 	"resources": {
 		"credentialDocumentation": [
 			{

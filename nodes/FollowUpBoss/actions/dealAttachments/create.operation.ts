@@ -1,4 +1,9 @@
-import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import type { IDataObject } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
 import { toInt, updateDisplayOptions, wrapData, getDealIdProperty } from '../../helpers/utils';
@@ -13,7 +18,8 @@ const displayOptions: IDisplayOptions = {
 const properties: INodeProperties[] = [
 	{
 		...getDealIdProperty(),
-		description: 'The ID of the deal you want to add an attachment to. Choose from the list, or specify an ID.',
+		description:
+			'The ID of the deal you want to add an attachment to. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'URI',
@@ -45,10 +51,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const dealIdRaw = (this.getNodeParameter('dealId', i) as IDataObject).value as string;
 	const dealId = toInt(dealIdRaw, 'Deal ID', this.getNode(), i);
 	const uri = this.getNodeParameter('uri', i) as string;

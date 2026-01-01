@@ -1,6 +1,18 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty, getTextMessageTemplateIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getPersonIdProperty,
+	getTextMessageTemplateIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -12,8 +24,7 @@ const displayOptions: IDisplayOptions = {
 const properties: INodeProperties[] = [
 	{
 		...getTextMessageTemplateIdProperty(true, 'templateId'),
-		description:
-			'ID of the template to merge. Choose from the list, or specify an ID.',
+		description: 'ID of the template to merge. Choose from the list, or specify an ID.',
 	},
 	{
 		...getPersonIdProperty(false),
@@ -55,10 +66,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const templateIdRaw = (this.getNodeParameter('templateId', i) as IDataObject).value as string;
 	const templateId = toInt(templateIdRaw, 'Text Message Template ID', this.getNode(), i);
 	const personIdParam = this.getNodeParameter('personId', i, { value: '' }) as IDataObject;
@@ -67,8 +75,11 @@ export async function execute(
 		to?: Array<{ name: string; phone: string }>;
 	};
 
-	const body: { templateId: number; personId?: number; recipients?: { to: Array<{ name: string; phone: string }> } } =
-	{
+	const body: {
+		templateId: number;
+		personId?: number;
+		recipients?: { to: Array<{ name: string; phone: string }> };
+	} = {
 		templateId,
 	};
 

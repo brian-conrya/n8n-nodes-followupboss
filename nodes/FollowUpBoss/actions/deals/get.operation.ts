@@ -1,4 +1,10 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
 import { toInt, updateDisplayOptions, wrapData, getDealIdProperty } from '../../helpers/utils';
 
@@ -27,5 +33,3 @@ export async function execute(
 	const response = await apiRequest.call(this, 'GET', `/deals/${dealId}`);
 	return wrapData(response);
 }
-
-

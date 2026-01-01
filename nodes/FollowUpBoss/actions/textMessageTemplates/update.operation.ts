@@ -1,6 +1,17 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getTextMessageTemplateIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getTextMessageTemplateIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -12,8 +23,7 @@ const displayOptions: IDisplayOptions = {
 const properties: INodeProperties[] = [
 	{
 		...getTextMessageTemplateIdProperty(true, 'id'),
-		description:
-			'ID of the template to update. Choose from the list, or specify an ID.',
+		description: 'ID of the template to update. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Name',
@@ -30,7 +40,8 @@ const properties: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: '%greeting_time%, %contact_first_name% Check out this beach house: https://example.com',
+		placeholder:
+			'%greeting_time%, %contact_first_name% Check out this beach house: https://example.com',
 		description: 'The body of your text message template',
 	},
 	{
@@ -54,10 +65,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'Text Message Template ID', this.getNode(), i);
 	const name = this.getNodeParameter('name', i) as string;

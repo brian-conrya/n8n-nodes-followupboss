@@ -1,4 +1,10 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
 import { updateDisplayOptions, wrapData } from '../../helpers/utils';
 
@@ -55,10 +61,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const name = this.getNodeParameter('name', i) as string;
 	const userIds = this.getNodeParameter('userIds', i) as number[];
 	const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;

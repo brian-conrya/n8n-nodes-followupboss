@@ -1,7 +1,18 @@
-import { IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import type { IDataObject } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getDealIdProperty, getDealAttachmentIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getDealIdProperty,
+	getDealAttachmentIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -17,7 +28,8 @@ const properties: INodeProperties[] = [
 	},
 	{
 		...getDealIdProperty(),
-		description: 'The ID of the deal you want to update the attachment for. Choose from the list, or specify an ID.',
+		description:
+			'The ID of the deal you want to update the attachment for. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'URI',
@@ -46,10 +58,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const idRaw = this.getNodeParameter('id', i) as string;
 	const id = toInt(idRaw, 'Attachment ID', this.getNode(), i);
 

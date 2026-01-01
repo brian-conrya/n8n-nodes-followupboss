@@ -1,6 +1,19 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapCreateSuccess, getPersonIdProperty, getUserIdProperty, getEmailMarketingCampaignIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapCreateSuccess,
+	getPersonIdProperty,
+	getUserIdProperty,
+	getEmailMarketingCampaignIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -12,7 +25,8 @@ const displayOptions: IDisplayOptions = {
 const properties: INodeProperties[] = [
 	{
 		...getEmailMarketingCampaignIdProperty(),
-		description: 'ID of the email campaign this event belongs to. Choose from the list, or specify an ID.',
+		description:
+			'ID of the email campaign this event belongs to. Choose from the list, or specify an ID.',
 	},
 	{
 		displayName: 'Event Type',
@@ -70,7 +84,8 @@ const properties: INodeProperties[] = [
 			},
 			{
 				...getUserIdProperty('User', 'userId', false),
-				description: 'Follow Up Boss user ID from whom the email was sent. Choose from the list, or specify an ID.',
+				description:
+					'Follow Up Boss user ID from whom the email was sent. Choose from the list, or specify an ID.',
 			},
 		],
 	},
@@ -78,10 +93,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const campaignIdRaw = (this.getNodeParameter('campaignId', i) as IDataObject).value as string;
 	const campaignId = toInt(campaignIdRaw, 'Campaign ID', this.getNode(), i);
 	const eventType = this.getNodeParameter('eventType', i) as string;

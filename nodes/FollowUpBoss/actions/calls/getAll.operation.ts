@@ -27,7 +27,8 @@ const resourceSpecificOptions: INodeProperties[] = [
 		name: 'phone',
 		type: 'string',
 		default: '',
-		description: 'Filter calls based on the phone number of a specific person or lead (finds calls regardless of whether they were incoming or outgoing)',
+		description:
+			'Filter calls based on the phone number of a specific person or lead (finds calls regardless of whether they were incoming or outgoing)',
 	},
 	{
 		displayName: 'To Number',
@@ -43,10 +44,7 @@ export const description: INodeProperties[] = createGetAllOperationDescription({
 	resourceSpecificOptions,
 });
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 	const options = this.getNodeParameter('options', i, {}) as IDataObject;
 	const qs: IDataObject = {};

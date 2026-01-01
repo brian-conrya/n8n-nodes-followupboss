@@ -1,6 +1,19 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { simplifyItems, toInt, wrapData, flattenPersonContactInfo, getPersonIdProperty, updateDisplayOptions } from '../../helpers/utils';
+import {
+	simplifyItems,
+	toInt,
+	wrapData,
+	flattenPersonContactInfo,
+	getPersonIdProperty,
+	updateDisplayOptions,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -25,10 +38,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
 	const id = toInt(idRaw, 'ID', this.getNode(), i);
 	const simplify = this.getNodeParameter('simplify', i) as boolean;

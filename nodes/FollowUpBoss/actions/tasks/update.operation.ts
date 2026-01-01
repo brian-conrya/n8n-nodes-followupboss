@@ -1,6 +1,19 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getTaskIdProperty, getUserIdProperty, getPersonIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getTaskIdProperty,
+	getUserIdProperty,
+	getPersonIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -58,7 +71,8 @@ const properties: INodeProperties[] = [
 				...getPersonIdProperty(),
 				name: 'personId',
 				required: false,
-				description: 'ID of the person this task is related to. Choose from the list, or specify an ID.',
+				description:
+					'ID of the person this task is related to. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Remind Seconds Before',

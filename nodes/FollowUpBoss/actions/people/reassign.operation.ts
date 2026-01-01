@@ -1,6 +1,21 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty, getAgentIdProperty, getLenderIdProperty, getGroupIdProperty, getPondIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getPersonIdProperty,
+	getAgentIdProperty,
+	getLenderIdProperty,
+	getGroupIdProperty,
+	getPondIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -56,8 +71,7 @@ const properties: INodeProperties[] = [
 				assignmentType: ['assignAgent'],
 			},
 		},
-		description:
-			'The agent to assign. Choose from the list, or specify an ID.',
+		description: 'The agent to assign. Choose from the list, or specify an ID.',
 	},
 	{
 		...getLenderIdProperty('Lender', 'lenderId', true),
@@ -66,8 +80,7 @@ const properties: INodeProperties[] = [
 				assignmentType: ['assignLender'],
 			},
 		},
-		description:
-			'The lender to assign. Choose from the list, or specify an ID.',
+		description: 'The lender to assign. Choose from the list, or specify an ID.',
 	},
 	{
 		...getGroupIdProperty(true),
@@ -76,8 +89,7 @@ const properties: INodeProperties[] = [
 				assignmentType: ['assignGroup'],
 			},
 		},
-		description:
-			'The group to assign. Choose from the list, or specify an ID.',
+		description: 'The group to assign. Choose from the list, or specify an ID.',
 	},
 	{
 		...getPondIdProperty(true),
@@ -86,17 +98,13 @@ const properties: INodeProperties[] = [
 				assignmentType: ['assignPond'],
 			},
 		},
-		description:
-			'The pond to assign. Choose from the list, or specify an ID.',
+		description: 'The pond to assign. Choose from the list, or specify an ID.',
 	},
 ];
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const personIdRaw = (this.getNodeParameter('personId', i) as IDataObject).value as string;
 	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	const assignmentType = this.getNodeParameter('assignmentType', i) as string;

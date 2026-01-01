@@ -69,7 +69,7 @@ const resourceSpecificOptions: INodeProperties[] = [
 		...getPersonIdProperty(),
 		name: 'personId',
 		required: false,
-		description: 'Find tasks by a person\'s ID. Choose from the list, or specify an ID.',
+		description: "Find tasks by a person's ID. Choose from the list, or specify an ID.",
 	},
 	{
 		displayName: 'Type',
@@ -123,10 +123,7 @@ export const description: INodeProperties[] = createGetAllOperationDescription({
 	resourceSpecificOptions,
 });
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 	const options = this.getNodeParameter('options', i, {}) as IDataObject;
 	const qs: IDataObject = {};

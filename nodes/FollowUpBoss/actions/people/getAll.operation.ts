@@ -85,7 +85,8 @@ export const description: INodeProperties[] = [
 			},
 			{
 				...getStageIdProperty(false, 'stage'),
-				description: 'Search for person by stage name. Choose from the list, or specify a stage name.',
+				description:
+					'Search for person by stage name. Choose from the list, or specify a stage name.',
 			},
 			{
 				displayName: 'Source',
@@ -103,12 +104,14 @@ export const description: INodeProperties[] = [
 			},
 			{
 				...getUserIdProperty('Assigned User', 'assignedUserId', false),
-				description: 'Search for people by the assigned user ID. Choose from the list, or specify an ID.',
+				description:
+					'Search for people by the assigned user ID. Choose from the list, or specify an ID.',
 			},
 			{
 				...getPondIdProperty(false),
 				name: 'assignedPondId',
-				description: 'Search for a person by the assigned pond ID. Choose from the list, or specify an ID.',
+				description:
+					'Search for a person by the assigned pond ID. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Assigned Lender Name',
@@ -119,7 +122,8 @@ export const description: INodeProperties[] = [
 			},
 			{
 				...getLenderIdProperty('Assigned Lender', 'assignedLenderId', false),
-				description: 'Search for people by the assigned lender user ID. Choose from the list, or specify an ID.',
+				description:
+					'Search for people by the assigned lender user ID. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Contacted',
@@ -144,7 +148,8 @@ export const description: INodeProperties[] = [
 			},
 			{
 				...getSmartListIdProperty(false, 'smartListId'),
-				description: 'Search for people that match a smart list with given ID. Choose from the list, or specify an ID.',
+				description:
+					'Search for people that match a smart list with given ID. Choose from the list, or specify an ID.',
 			},
 			{
 				displayName: 'Tags',
@@ -169,7 +174,8 @@ export const description: INodeProperties[] = [
 						values: [
 							{
 								...getCustomFieldNameProperty(true, 'key'),
-								description: 'Name of the custom field (with or without "custom" prefix). Choose from the list, or specify an ID.',
+								description:
+									'Name of the custom field (with or without "custom" prefix). Choose from the list, or specify an ID.',
 							},
 							{
 								displayName: 'Value',
@@ -199,10 +205,7 @@ export const description: INodeProperties[] = [
 	},
 ];
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 	const options = this.getNodeParameter('options', i, {}) as IDataObject;
 	const simplify = this.getNodeParameter('simplify', i) as boolean;
@@ -228,8 +231,10 @@ export async function execute(
 	if (options.assignedLenderName) qs.assignedLenderName = options.assignedLenderName;
 	if (options.assignedLenderId) qs.assignedLenderId = options.assignedLenderId;
 	if (options.contacted !== undefined) qs.contacted = options.contacted;
-	if (options.priceAbove) qs.priceAbove = toFloat(options.priceAbove as string, 'Price Above', this.getNode(), i);
-	if (options.priceBelow) qs.priceBelow = toFloat(options.priceBelow as string, 'Price Below', this.getNode(), i);
+	if (options.priceAbove)
+		qs.priceAbove = toFloat(options.priceAbove as string, 'Price Above', this.getNode(), i);
+	if (options.priceBelow)
+		qs.priceBelow = toFloat(options.priceBelow as string, 'Price Below', this.getNode(), i);
 	if (options.smartListId) qs.smartListId = options.smartListId;
 	if (options.tags) qs.tags = options.tags;
 

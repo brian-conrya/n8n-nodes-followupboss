@@ -1,6 +1,25 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { updateDisplayOptions, wrapData, toFloat, getUserIdProperty, getPondIdProperty, toInt, getLenderIdProperty, getCustomFieldNameProperty, getTimeframeIdProperty, getStageIdProperty, getTagsProperty, normalizeTags } from '../../helpers/utils';
+import {
+	updateDisplayOptions,
+	wrapData,
+	toFloat,
+	getUserIdProperty,
+	getPondIdProperty,
+	toInt,
+	getLenderIdProperty,
+	getCustomFieldNameProperty,
+	getTimeframeIdProperty,
+	getStageIdProperty,
+	getTagsProperty,
+	normalizeTags,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -28,8 +47,7 @@ const properties: INodeProperties[] = [
 	},
 	{
 		...getStageIdProperty(false, 'stage'),
-		description:
-			'The stage the person is in. Choose from the list, or specify a stage name.',
+		description: 'The stage the person is in. Choose from the list, or specify a stage name.',
 	},
 	{
 		displayName: 'Source',
@@ -301,13 +319,11 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const firstName = this.getNodeParameter('firstName', i) as string;
 	const lastName = this.getNodeParameter('lastName', i) as string;
-	const stageRaw = (this.getNodeParameter('stage', i, { value: '' }) as IDataObject).value as string;
+	const stageRaw = (this.getNodeParameter('stage', i, { value: '' }) as IDataObject)
+		.value as string;
 	const source = this.getNodeParameter('source', i) as string;
 	const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
 

@@ -53,7 +53,8 @@ export class FollowUpBoss implements INodeType {
 		version: 1,
 		subtitle: '',
 		description: 'Interact with the Follow Up Boss API',
-		documentationUrl: 'https://github.com/brian-conrya/n8n-nodes-followupboss/blob/main/nodes/FollowUpBoss/FollowUpBoss.md',
+		documentationUrl:
+			'https://github.com/brian-conrya/n8n-nodes-followupboss/blob/main/nodes/FollowUpBoss/FollowUpBoss.md',
 		defaults: {
 			name: 'Follow Up Boss',
 		},

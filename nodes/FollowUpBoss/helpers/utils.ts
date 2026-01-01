@@ -1,4 +1,3 @@
-
 import type {
 	IDataObject,
 	IDisplayOptions,
@@ -15,20 +14,13 @@ const INT32_MAX = 2147483647;
  * Parses a string ID to an Int32 number with validation.
  * Throws NodeOperationError if the value is not a valid Int32.
  */
-export function toInt(
-	value: string,
-	fieldName: string,
-	node: INode,
-	itemIndex: number,
-): number {
+export function toInt(value: string, fieldName: string, node: INode, itemIndex: number): number {
 	const parsed = parseInt(value, 10);
 
 	if (isNaN(parsed)) {
-		throw new NodeOperationError(
-			node,
-			`${fieldName} must be a valid number. Got: "${value}"`,
-			{ itemIndex },
-		);
+		throw new NodeOperationError(node, `${fieldName} must be a valid number. Got: "${value}"`, {
+			itemIndex,
+		});
 	}
 
 	if (parsed < INT32_MIN || parsed > INT32_MAX) {
@@ -60,22 +52,24 @@ export function toFloat(
 	const parsed = parseFloat(value);
 
 	if (isNaN(parsed)) {
-		throw new NodeOperationError(
-			node,
-			`${fieldName} must be a valid number. Got: "${value}"`,
-			{ itemIndex },
-		);
+		throw new NodeOperationError(node, `${fieldName} must be a valid number. Got: "${value}"`, {
+			itemIndex,
+		});
 	}
 
 	return parsed;
 }
 
-
 /**
  * Simple deep merge function to avoid external dependencies like lodash
  */
 function deepMerge(target: IDataObject, source: IDataObject): IDataObject {
-	if (typeof target !== 'object' || target === null || typeof source !== 'object' || source === null) {
+	if (
+		typeof target !== 'object' ||
+		target === null ||
+		typeof source !== 'object' ||
+		source === null
+	) {
 		return source;
 	}
 
@@ -220,14 +214,14 @@ export function getResourceLocatorProperty(options: IResourceLocatorOptions): IN
 			placeholder: isNumericId ? '123' : 'e.g. Stage Name',
 			validation: isNumericId
 				? [
-					{
-						type: 'regex',
-						properties: {
-							regex: '[0-9]+',
-							errorMessage: `Not a valid ${displayName} ID`,
+						{
+							type: 'regex',
+							properties: {
+								regex: '[0-9]+',
+								errorMessage: `Not a valid ${displayName} ID`,
+							},
 						},
-					},
-				]
+					]
 				: [],
 		},
 	];
@@ -313,7 +307,6 @@ export function getUserIdProperty(
 	});
 }
 
-
 export function getLenderIdProperty(
 	displayName = 'Lender',
 	name = 'lenderId',
@@ -365,7 +358,11 @@ export function getPipelineStageIdProperty(required = true, name = 'stageId'): I
 	});
 }
 
-export function getStageIdProperty(required = true, name = 'stage', isNumericId = false): INodeProperties {
+export function getStageIdProperty(
+	required = true,
+	name = 'stage',
+	isNumericId = false,
+): INodeProperties {
 	return getResourceLocatorProperty({
 		displayName: 'Stage',
 		name,
@@ -394,7 +391,10 @@ export function getTimeframeIdProperty(required = true, name = 'timeframeId'): I
 	});
 }
 
-export function getAppointmentOutcomeIdProperty(required = true, name = 'outcomeId'): INodeProperties {
+export function getAppointmentOutcomeIdProperty(
+	required = true,
+	name = 'outcomeId',
+): INodeProperties {
 	return getResourceLocatorProperty({
 		displayName: 'Appointment Outcome',
 		name,
@@ -413,7 +413,11 @@ export function getActionPlanIdProperty(required = true, name = 'actionPlanId'):
 	});
 }
 
-export function getAutomationIdProperty(required = true, name = 'automationId', manualOnly = false): INodeProperties {
+export function getAutomationIdProperty(
+	required = true,
+	name = 'automationId',
+	manualOnly = false,
+): INodeProperties {
 	return getResourceLocatorProperty({
 		displayName: 'Automation',
 		name,
@@ -482,7 +486,10 @@ export function getEmailTemplateIdProperty(required = true, name = 'templateId')
 	});
 }
 
-export function getTextMessageTemplateIdProperty(required = true, name = 'templateId'): INodeProperties {
+export function getTextMessageTemplateIdProperty(
+	required = true,
+	name = 'templateId',
+): INodeProperties {
 	return getResourceLocatorProperty({
 		displayName: 'Text Message Template',
 		name,
@@ -556,7 +563,10 @@ export function getEventIdProperty(required = true, name = 'eventId'): INodeProp
 	});
 }
 
-export function getRelationshipIdProperty(required = true, name = 'relationshipId'): INodeProperties {
+export function getRelationshipIdProperty(
+	required = true,
+	name = 'relationshipId',
+): INodeProperties {
 	return getResourceLocatorProperty({
 		displayName: 'Relationship',
 		name,
@@ -576,7 +586,6 @@ export function getTextMessageIdProperty(required = true, name = 'textMessageId'
 	};
 }
 
-
 export function getReactionIdProperty(required = true, name = 'id'): INodeProperties {
 	return {
 		displayName: 'Reaction ID',
@@ -587,7 +596,10 @@ export function getReactionIdProperty(required = true, name = 'id'): INodeProper
 	};
 }
 
-export function getDealAttachmentIdProperty(required = true, name = 'attachmentId'): INodeProperties {
+export function getDealAttachmentIdProperty(
+	required = true,
+	name = 'attachmentId',
+): INodeProperties {
 	return {
 		displayName: 'Attachment ID',
 		name,
@@ -597,7 +609,10 @@ export function getDealAttachmentIdProperty(required = true, name = 'attachmentI
 	};
 }
 
-export function getActionPlanPersonAssignmentIdProperty(required = true, name = 'id'): INodeProperties {
+export function getActionPlanPersonAssignmentIdProperty(
+	required = true,
+	name = 'id',
+): INodeProperties {
 	return getResourceLocatorProperty({
 		displayName: 'Assignment',
 		name,
@@ -607,7 +622,10 @@ export function getActionPlanPersonAssignmentIdProperty(required = true, name = 
 	});
 }
 
-export function getEmailMarketingCampaignIdProperty(required = true, name = 'campaignId'): INodeProperties {
+export function getEmailMarketingCampaignIdProperty(
+	required = true,
+	name = 'campaignId',
+): INodeProperties {
 	return getResourceLocatorProperty({
 		displayName: 'Campaign',
 		name,
@@ -657,11 +675,7 @@ export function getAutomationPersonAssignmentIdProperty(required = true): INodeP
 	});
 }
 
-export function addCommonParameters(
-	options: IDataObject,
-	qs: IDataObject,
-	sort?: IDataObject,
-) {
+export function addCommonParameters(options: IDataObject, qs: IDataObject, sort?: IDataObject) {
 	if (options.ids) qs.ids = options.ids;
 	if (options.idLessThan) qs.idLessThan = options.idLessThan;
 	if (options.idGreaterThan) qs.idGreaterThan = options.idGreaterThan;

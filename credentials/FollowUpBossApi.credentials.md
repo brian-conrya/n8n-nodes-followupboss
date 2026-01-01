@@ -8,7 +8,7 @@ You need a Follow Up Boss account.
 
 ## Supported Authentication Methods
 
-*   **API Key + System Identification**: Requires **API Key**, **System Name**, and **System Key**. All fields are mandatory.
+- **API Key + System Identification**: Requires **API Key**, **System Name**, and **System Key**. All fields are mandatory.
 
 ## How to get the Credentials
 

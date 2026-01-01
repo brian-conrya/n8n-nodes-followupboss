@@ -1,6 +1,18 @@
-import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import {
+	IDataObject,
+	IDisplayOptions,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty, getActionPlanIdProperty } from '../../helpers/utils';
+import {
+	toInt,
+	updateDisplayOptions,
+	wrapData,
+	getPersonIdProperty,
+	getActionPlanIdProperty,
+} from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -12,8 +24,7 @@ const displayOptions: IDisplayOptions = {
 const properties: INodeProperties[] = [
 	{
 		...getActionPlanIdProperty(true, 'actionPlanId'),
-		description:
-			'ID of the action plan. Choose from the list, or specify an ID.',
+		description: 'ID of the action plan. Choose from the list, or specify an ID.',
 	},
 	{
 		...getPersonIdProperty(),
@@ -23,10 +34,7 @@ const properties: INodeProperties[] = [
 
 export const description = updateDisplayOptions(displayOptions, properties);
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const actionPlanIdRaw = (this.getNodeParameter('actionPlanId', i) as IDataObject).value as string;
 	const actionPlanId = toInt(actionPlanIdRaw, 'Action Plan ID', this.getNode(), i);
 	const personIdRaw = (this.getNodeParameter('personId', i) as IDataObject).value as string;

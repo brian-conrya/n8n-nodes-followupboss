@@ -1,4 +1,10 @@
-import { IDataObject, IExecuteFunctions, INodeExecutionData, INodeProperties, NodeOperationError } from 'n8n-workflow';
+import {
+	IDataObject,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+	NodeOperationError,
+} from 'n8n-workflow';
 import { apiRequestAllItems } from '../../transport';
 import {
 	addCommonParameters,
@@ -15,7 +21,8 @@ export const description: INodeProperties[] = createGetAllOperationDescription({
 	resourceSpecificOptions: [
 		{
 			...getPersonIdProperty(false),
-			description: 'Filter text messages for a specific person ID only. Choose from the list, or specify an ID.',
+			description:
+				'Filter text messages for a specific person ID only. Choose from the list, or specify an ID.',
 		},
 		{
 			displayName: 'To Number',
@@ -34,10 +41,7 @@ export const description: INodeProperties[] = createGetAllOperationDescription({
 	],
 });
 
-export async function execute(
-	this: IExecuteFunctions,
-	i: number,
-): Promise<INodeExecutionData[]> {
+export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
 	const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 	const options = this.getNodeParameter('options', i, {}) as IDataObject;
 	const qs: IDataObject = {};
@@ -46,7 +50,10 @@ export async function execute(
 	addCommonParameters(options, qs, sort);
 
 	if (!options.personId && !options.toNumber && !options.fromNumber) {
-		throw new NodeOperationError(this.getNode(), 'You must provide at least one of "Person ID", "To Number", or "From Number".');
+		throw new NodeOperationError(
+			this.getNode(),
+			'You must provide at least one of "Person ID", "To Number", or "From Number".',
+		);
 	}
 
 	if (options.personId) {
