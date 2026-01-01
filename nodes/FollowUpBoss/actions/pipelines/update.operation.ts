@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getPipelineIdProperty, getPipelineStageIdProperty } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData, getPipelineIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -102,9 +102,11 @@ const properties: INodeProperties[] = [
 						description: 'Set this value to enforce a specific sort order',
 					},
 					{
-						...getPipelineStageIdProperty(false),
+						displayName: 'Stage ID',
 						name: 'id',
-						description: 'ID of the stage to update. If not provided, a new stage will be created. Choose from the list, or specify an ID.',
+						type: 'string',
+						default: '',
+						description: 'ID of the stage to update. If not provided, a new stage will be created.',
 					},
 				],
 			},
@@ -148,8 +150,8 @@ export async function execute(
 					stageObj.name = stage.name;
 				}
 
-				if (stage.stageId) {
-					stageObj.id = toInt(stage.stageId as string, 'Stage ID', this.getNode(), i);
+				if (stage.id) {
+					stageObj.id = toInt(stage.id as string, 'Stage ID', this.getNode(), i);
 				}
 				if (stage.color) {
 					stageObj.color = stage.color;
