@@ -1,6 +1,6 @@
 # Follow Up Boss Handler Node
 
-The Follow Up Boss Handler node processes webhook events from the [Follow Up Boss Trigger](FollowUpBossTrigger.md), providing data hydration and pre-hydration filtering capabilities.
+The Follow Up Boss Handler node processes webhook events from the [Follow Up Boss Trigger](FollowUpBossTrigger.md). It fetches full resource data from the API and provides filtering capabilities.
 
 ## Use Case
 
@@ -9,28 +9,46 @@ This node is designed to work downstream from the [Follow Up Boss Trigger](Follo
 ```
 Trigger → Handler → [Other Nodes]
   ↓         ↓
- Raw    Hydrated
+ Raw     Full Data
 Payload  + Filtered
 ```
 
 The Trigger outputs lightweight webhook payloads, and the Handler fetches the full data from the Follow Up Boss API while optionally filtering events before making expensive API calls.
 
+## Why a Separate Handler Node?
+
+Follow Up Boss limits the number of webhooks you can register. By keeping the Trigger node lightweight and moving data fetching/filtering into a separate Handler node, you can:
+
+1. **Maximize webhook efficiency** - Register one webhook per event type and branch into multiple Handler configurations downstream
+2. **Reuse webhooks** - A single `People Updated` trigger can feed multiple workflows with different filtering criteria
+3. **Reduce API quota usage** - Pre-filter events before fetching full data from the API
+
+```
+                    ┌→ Handler (Filter: Tags) → Workflow A
+Trigger (People) ───┼→ Handler (Filter: Stage) → Workflow B
+                    └→ Handler (Get Full Data) → Workflow C
+```
+
 ## Operations
 
-### Hydrate (Get Full Data)
+### Get Full Data
 Fetches the complete resource data for any webhook event without filtering.
 
 **Use when**: You want full data for all webhook events.
 
-### Filter: Webhook Event
-Pre-filters based on the webhook event type before hydration.
+---
+
+### Filter by Webhook Event
+Pre-filters based on the webhook event type before fetching full data.
 
 **Parameters**:
 - **Filter by Webhook Event** - Select which webhook event types to process (e.g., `peopleCreated`, `appointmentsUpdated`, `notesCreated`)
 
 **Use when**: You only care about specific event types and want to avoid unnecessary API calls for others.
 
-### Filter: Tags Created
+---
+
+### Filter by Tags Created
 Pre-filters `People Tags Created` events based on which tags were added.
 
 **Parameters**:
@@ -40,7 +58,9 @@ Pre-filters `People Tags Created` events based on which tags were added.
 
 **Use when**: You want to trigger workflows only when specific tags are added to people (e.g., "Hot Lead", "VIP Client").
 
-### Filter: Stage Updated
+---
+
+### Filter by Stage Updated
 Pre-filters `People Stage Updated` events based on which stage people moved to.
 
 **Parameters**:
@@ -48,38 +68,80 @@ Pre-filters `People Stage Updated` events based on which stage people moved to.
 
 **Use when**: You want workflows to run only when people enter specific pipeline stages (e.g., "Under Contract", "Closed").
 
-### Filter: Reference Type (Reactions/Replies)
-Pre-filters events based on the `refType` field (reactions and threaded replies).
+---
+
+### Filter by Person Event
+Filters `eventsCreated` webhook events with comprehensive criteria for person-level activities like inquiries, registrations, and property engagement.
 
 **Parameters**:
-- **Filter by Reference Type** - Currently supports "Note"
+- **Event Source** - Filter by the top-level source (e.g., "Zillow", "Realtor.com")
+- **Person IDs** - Comma-separated list of Person IDs to filter by
+- **Event Types** - Filter by specific event types:
+  - General Inquiry
+  - Incoming Call
+  - Inquiry
+  - Property Inquiry
+  - Property Search
+  - Registration
+  - Saved Property
+  - Saved Property Search
+  - Seller Inquiry
+  - Unsubscribed
+  - Viewed Page
+  - Viewed Property
+  - Visited Open House
+  - Visited Website
 
-**Use when**: You want to process only certain types of reactions or replies.
+**Property Filters** (optional collection):
+- **City** - Exact city name match
+- **State** - Exact state code match (e.g., "PA")
+- **Zip Code** - Exact zip code match
+- **Neighborhood** - Contains match (case-insensitive)
+- **MLS Number** - Exact MLS number match
+- **Min Price** / **Max Price** - Price range filters
 
-## Pre-Hydration vs Post-Hydration Filtering
+**Engagement Filters** (optional collection):
+- **URL** - Page URL contains (case-insensitive)
+- **Page Title** - Page title contains (case-insensitive)
+- **Message** - Message or description contains (case-insensitive)
 
-**Pre-Hydration Filtering** (This Node):
-- Checks lightweight webhook payload fields (`event`, `data.tags`, `data.stage`, `data.refType`)
-- Skips API hydration call if filter doesn't match
-- Saves API quota and improves performance
+**Campaign Filters** (optional collection):
+- **Campaign Name** - Campaign name contains (case-insensitive)
+- **Source** - Campaign source contains (case-insensitive)
+- **Medium** - Campaign medium contains (case-insensitive)
+- **Term** - Campaign term contains (case-insensitive)
+- **Content** - Campaign content contains (case-insensitive)
 
-**Post-Hydration Filtering** (Use Switch/If Nodes):
-- For complex filtering on full resource data (e.g., property city, price ranges, custom fields)
-- Place a **Switch** or **If** node after the Handler to filter on hydrated data
+**Use when**: You want fine-grained control over which person events trigger your workflow, such as filtering for Zillow leads with properties over $500k in specific cities.
+
+## How Filtering Works
+
+**Pre-Fetch Filtering** (Webhook Event, Tags Created, Stage Updated):
+- Checks lightweight webhook payload fields (`event`, `data.tags`, `data.stage`)
+- Skips API call if filter doesn't match—saves quota
+
+**Post-Fetch Filtering** (Person Event filters):
+- First fetches full event data, then applies detailed filters
+- Allows filtering on property details, engagement data, campaign info
+- Useful when you need data not available in the webhook payload
+
+**Post-Handler Filtering** (Use Filter/Switch/If Nodes):
+- For complex filtering beyond what this node provides
+- Place a **Filter**, **Switch**, or **If** node after the Handler to filter on any field
 
 ## Example Workflows
 
 ### Example 1: Hot Lead Tag Workflow
 ```
 Trigger (People Tags Created) 
-  → Handler (Filter: Tags Created → "Hot Lead")
+  → Handler (Filter by Tags Created → "Hot Lead")
     → Send Slack Notification
 ```
 
 ### Example 2: Stage Change Automation
 ```
 Trigger (People Stage Updated)
-  → Handler (Filter: Stage Updated → "Under Contract")
+  → Handler (Filter by Stage Updated → "Under Contract")
     → Create Task
     → Send Email
 ```
@@ -87,10 +149,30 @@ Trigger (People Stage Updated)
 ### Example 3: Multi-Event Processing
 ```
 Trigger (People Updated)
-  → Handler (Filter: Webhook Event → peopleUpdated, peopleCreated)
-    → Switch (on hydrated data)
-      → Case 1: Price > $500k → High-value workflow
-      → Case 2: Price < $500k → Standard workflow
+  → Handler (Filter by Webhook Event → peopleUpdated, peopleCreated)
+    → Switch (on full data)
+      → Case 1: custom condition → Workflow A
+      → Case 2: other condition → Workflow B
+```
+
+### Example 4: High-Value Zillow Lead Filtering
+```
+Trigger (Events Created)
+  → Handler (Filter by Person Event)
+      Event Source: "Zillow"
+      Event Types: "Property Inquiry"
+      Property Filters: Min Price: 500000
+    → Create High-Priority Task
+    → Notify Agent
+```
+
+### Example 5: Local Engagement Tracking
+```
+Trigger (Events Created)
+  → Handler (Filter by Person Event)
+      Event Types: "Viewed Property", "Registration"
+      Property Filters: City: "Philadelphia", State: "PA"
+    → Log Local Lead Activity
 ```
 
 ## Credentials
