@@ -1,0 +1,58 @@
+{
+	"name": "n8n-nodes-followupboss",
+	"version": "0.1.0",
+	"description": "n8n community node for Follow Up Boss CRM integration",
+	"license": "MIT",
+	"homepage": "https://github.com/brian-conrya/n8n-nodes-followupboss",
+	"keywords": [
+		"n8n-community-node-package",
+		"n8n",
+		"followupboss",
+		"crm",
+		"real-estate"
+	],
+	"author": {
+		"name": "Brian Hurley",
+		"email": "brian@conrya.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/brian-conrya/n8n-nodes-followupboss.git"
+	},
+	"scripts": {
+		"build": "n8n-node build",
+		"build:watch": "tsc --watch",
+		"dev": "n8n-node dev",
+		"lint": "n8n-node lint",
+		"lint:fix": "n8n-node lint --fix",
+		"release": "n8n-node release",
+		"prepublishOnly": "n8n-node prerelease"
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"strict": true,
+		"credentials": [
+			"dist/credentials/FollowUpBossApi.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/FollowUpBoss/FollowUpBoss.node.js",
+			"dist/nodes/FollowUpBoss/FollowUpBossTrigger.node.js",
+			"dist/nodes/FollowUpBoss/FollowUpBossHandler.node.js"
+		]
+	},
+	"devDependencies": {
+		"@n8n/node-cli": "*",
+		"@types/node": "^24.10.1",
+		"eslint": "9.32.0",
+		"n8n-workflow": "^1.17.0",
+		"prettier": "3.6.2",
+		"release-it": "^19.0.4",
+		"typescript": "^5.9.2"
+	},
+	"peerDependencies": {
+		"n8n-workflow": "*"
+	}
+}
