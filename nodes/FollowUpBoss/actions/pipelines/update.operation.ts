@@ -41,8 +41,8 @@ const properties: INodeProperties[] = [
 			{
 				displayName: 'Order Weight',
 				name: 'orderWeight',
-				type: 'number',
-				default: 0,
+				type: 'string',
+				default: '',
 				placeholder: '1000',
 				description: 'Set this value to enforce a specific sort order',
 			},
@@ -90,15 +90,14 @@ const properties: INodeProperties[] = [
 						name: 'name',
 						type: 'string',
 						default: '',
-						required: true,
 						placeholder: 'Buyer pipeline',
 						description: 'Name of the stage',
 					},
 					{
 						displayName: 'Order Weight',
 						name: 'orderWeight',
-						type: 'number',
-						default: 0,
+						type: 'string',
+						default: '',
 						placeholder: '1000',
 						description: 'Set this value to enforce a specific sort order',
 					},
@@ -123,35 +122,34 @@ export async function execute(
 	const id = toInt(idRaw, 'Pipeline ID', this.getNode(), i);
 
 	const updateFields = this.getNodeParameter('updateFields', i, {}) as IDataObject;
-	const description = updateFields.description as string;
-	const name = updateFields.name as string;
-	const orderWeight = updateFields.orderWeight as number;
 	const stagesData = this.getNodeParameter('stages', i, {}) as IDataObject;
 
 	const body: IDataObject = {};
 
-	if (description) {
-		body.description = description;
+	if (updateFields.description) {
+		body.description = updateFields.description;
 	}
-	if (name) {
-		body.name = name;
+	if (updateFields.name) {
+		body.name = updateFields.name;
 	}
-	if (orderWeight) {
-		body.orderWeight = orderWeight;
+	if (updateFields.orderWeight) {
+		body.orderWeight = toInt(updateFields.orderWeight as string, 'Order Weight', this.getNode(), i);
 	}
 
 	if (stagesData.stage) {
 		const stages = stagesData.stage as IDataObject[];
 		if (stages.length > 0) {
-			body.stages = stages.map(stage => {
+			body.stages = stages.map((stage) => {
 				const stageObj: IDataObject = {
-					name: stage.name,
 					closedStage: stage.closedStage || false,
 				};
 
-				if (stage.id) {
-					const stageIdRaw = (stage.id as IDataObject).value as string;
-					stageObj.id = toInt(stageIdRaw, 'Stage ID', this.getNode(), i);
+				if (stage.name) {
+					stageObj.name = stage.name;
+				}
+
+				if (stage.stageId) {
+					stageObj.id = toInt(stage.stageId as string, 'Stage ID', this.getNode(), i);
 				}
 				if (stage.color) {
 					stageObj.color = stage.color;
@@ -160,7 +158,12 @@ export async function execute(
 					stageObj.description = stage.description;
 				}
 				if (stage.orderWeight) {
-					stageObj.orderWeight = stage.orderWeight;
+					stageObj.orderWeight = toInt(
+						stage.orderWeight as string,
+						'Stage Order Weight',
+						this.getNode(),
+						i,
+					);
 				}
 
 				return stageObj;

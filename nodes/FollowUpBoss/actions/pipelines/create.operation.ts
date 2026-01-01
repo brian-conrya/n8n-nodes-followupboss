@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { updateDisplayOptions, wrapData } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, wrapData } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -37,8 +37,8 @@ const properties: INodeProperties[] = [
 			{
 				displayName: 'Order Weight',
 				name: 'orderWeight',
-				type: 'number',
-				default: 1000,
+				type: 'string',
+				default: '',
 				placeholder: '1000',
 				description: 'Set this value to enforce a specific sort order',
 			},
@@ -93,8 +93,8 @@ const properties: INodeProperties[] = [
 							{
 								displayName: 'Order Weight',
 								name: 'orderWeight',
-								type: 'number',
-								default: 1000,
+								type: 'string',
+								default: '',
 								placeholder: '1000',
 								description: 'Set this value to enforce a specific sort order',
 							},
@@ -121,14 +121,38 @@ export async function execute(
 		body.description = additionalFields.description;
 	}
 
-	if (additionalFields.orderWeight !== undefined) {
-		body.orderWeight = additionalFields.orderWeight;
+	if (additionalFields.orderWeight) {
+		body.orderWeight = toInt(additionalFields.orderWeight as string, 'Order Weight', this.getNode(), i);
 	}
 
 	if (additionalFields.stages) {
 		const stagesData = additionalFields.stages as IDataObject;
 		if (stagesData.stageValues && Array.isArray(stagesData.stageValues)) {
-			body.stages = stagesData.stageValues;
+			body.stages = stagesData.stageValues.map((stage) => {
+				const stageObj: IDataObject = {
+					name: stage.name,
+					closedStage: stage.closedStage ?? false,
+				};
+
+				if (stage.description) {
+					stageObj.description = stage.description;
+				}
+
+				if (stage.orderWeight) {
+					stageObj.orderWeight = toInt(
+						stage.orderWeight as string,
+						'Stage Order Weight',
+						this.getNode(),
+						i,
+					);
+				}
+
+				if (stage.color) {
+					stageObj.color = stage.color;
+				}
+
+				return stageObj;
+			});
 		}
 	}
 
