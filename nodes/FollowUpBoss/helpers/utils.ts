@@ -280,6 +280,17 @@ export function getPersonIdProperty(required = true, name = 'personId'): INodePr
 	});
 }
 
+export function getUnclaimedPersonIdProperty(required = true, name = 'personId'): INodeProperties {
+	return getResourceLocatorProperty({
+		displayName: 'Unclaimed Person',
+		name,
+		searchListMethod: 'getUnclaimedPeople',
+		urlRegex: 'https://.*\\.followupboss\\.com/.*people/view/(\\d+)',
+		urlPlaceholder: 'https://subdomain.followupboss.com/2/people/view/123',
+		required,
+	});
+}
+
 export function getTaskIdProperty(required = true, name = 'taskId'): INodeProperties {
 	return getResourceLocatorProperty({
 		displayName: 'Task ID',

@@ -1,6 +1,6 @@
 import { IDataObject, IDisplayOptions, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { toInt, updateDisplayOptions, wrapData, getPersonIdProperty } from '../../helpers/utils';
+import { toInt, updateDisplayOptions, getUnclaimedPersonIdProperty } from '../../helpers/utils';
 
 const displayOptions: IDisplayOptions = {
 	show: {
@@ -10,10 +10,7 @@ const displayOptions: IDisplayOptions = {
 };
 
 const properties: INodeProperties[] = [
-	{
-		...getPersonIdProperty(),
-		name: 'id',
-	},
+	getUnclaimedPersonIdProperty(),
 ];
 
 export const description = updateDisplayOptions(displayOptions, properties);
@@ -22,9 +19,8 @@ export async function execute(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
-	const idRaw = (this.getNodeParameter('id', i) as IDataObject).value as string;
-	const id = toInt(idRaw, 'Person ID', this.getNode(), i);
-	const response = await apiRequest.call(this, 'POST', '/people/ignoreUnclaimed', {}, { id });
-	return wrapData(response);
+	const personIdRaw = (this.getNodeParameter('personId', i) as IDataObject).value as string;
+	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
+	await apiRequest.call(this, 'POST', `/people/ignoreUnclaimed/${personId}`);
+	return [{ json: { ignored: true } }];
 }
-

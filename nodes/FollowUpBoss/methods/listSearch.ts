@@ -23,6 +23,21 @@ export async function getPeople(this: ILoadOptionsFunctions, filter?: string, pa
     return { results: mapped, paginationToken: nextUrl };
 }
 
+export async function getUnclaimedPeople(
+    this: ILoadOptionsFunctions,
+    filter?: string,
+): Promise<INodeListSearchResult> {
+    const results = await apiRequestAllItems.call(this, '/people/unclaimed', {});
+    let mapped = results.map((item: IDataObject) => ({
+        name: (item.name as string) || `${item.firstName} ${item.lastName}`,
+        value: item.id as number,
+    }));
+    if (filter) {
+        mapped = mapped.filter((item) => item.name.toLowerCase().includes(filter.toLowerCase()));
+    }
+    return { results: mapped.sort((a, b) => a.name.localeCompare(b.name)) };
+}
+
 export async function getTasks(this: ILoadOptionsFunctions, filter?: string, paginationToken?: string): Promise<INodeListSearchResult> {
     const query: IDataObject = {
         sort: 'name',
