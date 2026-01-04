@@ -1,6 +1,7 @@
 import {
 	IExecuteFunctions,
 	IHookFunctions,
+	IHttpRequestOptions,
 	ILoadOptionsFunctions,
 	IWebhookFunctions,
 	IDataObject,
@@ -37,37 +38,19 @@ async function makeRequest(
 	qs: IDataObject = {},
 	url?: string,
 ): Promise<IDataObject> {
-	const credentials = await context.getCredentials('followUpBossApi');
+	const authentication = context.getNodeParameter('authentication', 0, 'apiKey') as string;
+	const credentialType = authentication === 'apiKey' ? 'followUpBossApi' : 'followUpBossOAuth2Api';
 
-	const options: {
-		method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-		headers: IDataObject;
-		qs: IDataObject;
-		body?: IDataObject;
-		json: boolean;
-		auth: { username: string; password: string };
-		url: string;
-	} = {
-		method: method as 'GET' | 'POST' | 'PUT' | 'DELETE',
+	const options: IHttpRequestOptions = {
+		method: method as IHttpRequestOptions['method'],
 		headers: {
 			'Content-Type': 'application/json',
-		} as IDataObject,
+		},
 		qs,
 		body,
 		json: true,
-		auth: {
-			username: credentials.apiKey as string,
-			password: '',
-		},
 		url: url || `https://api.followupboss.com/v1${endpoint}`,
 	};
-
-	if (credentials.systemName) {
-		options.headers['X-System'] = credentials.systemName as string;
-	}
-	if (credentials.systemKey) {
-		options.headers['X-System-Key'] = credentials.systemKey as string;
-	}
 
 	if (Object.keys(body).length === 0) {
 		delete options.body;
@@ -80,7 +63,11 @@ async function makeRequest(
 
 	while (attempt <= maxRetries) {
 		try {
-			return (await context.helpers.httpRequest(options)) as IDataObject;
+			return (await context.helpers.httpRequestWithAuthentication.call(
+				context,
+				credentialType,
+				options,
+			)) as IDataObject;
 		} catch (error) {
 			lastError = error;
 			attempt++;

@@ -36,7 +36,8 @@
     "n8nNodesApiVersion": 1,
     "strict": true,
     "credentials": [
-      "dist/credentials/FollowUpBossApi.credentials.js"
+      "dist/credentials/FollowUpBossApi.credentials.js",
+      "dist/credentials/FollowUpBossOAuth2Api.credentials.js"
     ],
     "nodes": [
       "dist/nodes/FollowUpBoss/FollowUpBoss.node.js",

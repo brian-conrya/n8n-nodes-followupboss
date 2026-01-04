@@ -32,7 +32,26 @@ export class FollowUpBossTrigger implements INodeType {
 		},
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
-		credentials: [{ name: 'followUpBossApi', required: true }],
+		credentials: [
+			{
+				name: 'followUpBossApi',
+				required: true,
+				displayOptions: {
+					show: {
+						authentication: ['apiKey'],
+					},
+				},
+			},
+			{
+				name: 'followUpBossOAuth2Api',
+				required: true,
+				displayOptions: {
+					show: {
+						authentication: ['oAuth2'],
+					},
+				},
+			},
+		],
 		webhooks: [
 			{
 				name: 'default',
@@ -43,6 +62,22 @@ export class FollowUpBossTrigger implements INodeType {
 			},
 		],
 		properties: [
+			{
+				displayName: 'Authentication',
+				name: 'authentication',
+				type: 'options',
+				options: [
+					{
+						name: 'API Key',
+						value: 'apiKey',
+					},
+					{
+						name: 'OAuth2',
+						value: 'oAuth2',
+					},
+				],
+				default: 'apiKey',
+			},
 			{
 				displayName:
 					'Only 1 active workflow per event (the 2nd slot is reserved for testing). Activating a new workflow will disconnect any previous one for this event. Need more? Use an Execute Workflow node to fan out from a single trigger.',
@@ -285,7 +320,9 @@ export class FollowUpBossTrigger implements INodeType {
 		const req = this.getRequestObject();
 
 		// Normal webhook handling for production mode
-		const credentials = await this.getCredentials('followUpBossApi');
+		const authentication = this.getNodeParameter('authentication', 'apiKey') as string;
+		const credentialType = authentication === 'apiKey' ? 'followUpBossApi' : 'followUpBossOAuth2Api';
+		const credentials = await this.getCredentials(credentialType);
 
 		// Signature Verification
 		const systemKey = credentials.systemKey as string;
