@@ -17,6 +17,12 @@ export class FollowUpBossApi implements ICredentialType {
 
 	properties: INodeProperties[] = [
 		{
+			displayName: 'Need help filling out these fields? [Open docs](https://github.com/brian-conrya/n8n-nodes-followupboss/blob/main/credentials/FollowUpBossApi.credentials.md)',
+			name: 'notice',
+			type: 'notice',
+			default: '',
+		},
+		{
 			displayName: 'API Key',
 			name: 'apiKey',
 			type: 'string',
