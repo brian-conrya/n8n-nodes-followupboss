@@ -2,11 +2,18 @@
 	"node": "n8n-nodes-followupboss",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": ["Sales", "Marketing & Content", "Communication"],
+	"categories": [
+		"Sales",
+		"Marketing & Content",
+		"Communication"
+	],
 	"resources": {
 		"credentialDocumentation": [
 			{
 				"url": "https://github.com/brian-conrya/n8n-nodes-followupboss/blob/main/credentials/FollowUpBossApi.credentials.md"
+			},
+			{
+				"url": "https://github.com/brian-conrya/n8n-nodes-followupboss/blob/main/credentials/FollowUpBossOAuth2Api.credentials.md"
 			}
 		],
 		"primaryDocumentation": [

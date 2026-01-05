@@ -45,7 +45,10 @@ This node supports the following resources and operations:
 
 ## Credentials
 
-To use this node, you need to configure the **Follow Up Boss API** credential. See [Follow Up Boss API Credentials](../../credentials/FollowUpBossApi.credentials.md) for setup instructions.
+This node supports both API Key and OAuth2 authentication.
+
+- [API Key Credentials](../../credentials/FollowUpBossApi.credentials.md)
+- [OAuth2 Credentials](../../credentials/FollowUpBossOAuth2Api.credentials.md)
 
 ## Resources
 

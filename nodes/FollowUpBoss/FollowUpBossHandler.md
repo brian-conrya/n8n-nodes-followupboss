@@ -197,7 +197,10 @@ Trigger (Events Created)
 
 ## Credentials
 
-This node uses the same **Follow Up Boss API** credential as the main node and trigger. See [Follow Up Boss API Credentials](../../credentials/FollowUpBossApi.credentials.md).
+This node supports both API Key and OAuth2 authentication.
+
+- [API Key Credentials](../../credentials/FollowUpBossApi.credentials.md)
+- [OAuth2 Credentials](../../credentials/FollowUpBossOAuth2Api.credentials.md)
 
 ## Related Nodes
 

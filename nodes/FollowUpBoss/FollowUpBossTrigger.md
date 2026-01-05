@@ -117,7 +117,10 @@ The trigger automatically verifies webhook signatures using your Follow Up Boss 
 
 ## Credentials
 
-This node uses the **Follow Up Boss API** credential. See [Follow Up Boss API Credentials](../../credentials/FollowUpBossApi.credentials.md).
+This node supports both API Key and OAuth2 authentication.
+
+- [API Key Credentials](../../credentials/FollowUpBossApi.credentials.md)
+- [OAuth2 Credentials](../../credentials/FollowUpBossOAuth2Api.credentials.md)
 
 ## Related Nodes
 

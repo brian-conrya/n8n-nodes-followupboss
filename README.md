@@ -55,9 +55,10 @@ Place downstream from the Trigger to:
 
 ## Credentials
 
-You need a Follow Up Boss API Key to facilitate the connection.
+You can authenticate with Follow Up Boss using either an API Key or OAuth2.
 
-See [Credential Documentation](credentials/FollowUpBossApi.credentials.md) for setup instructions.
+- **[API Key Credentials](credentials/FollowUpBossApi.credentials.md)**: Best for private integrations and rapid development.
+- **[OAuth2 Credentials](credentials/FollowUpBossOAuth2Api.credentials.md)**: Required for public integrations and more granular access control.
 
 ## Resources
 
