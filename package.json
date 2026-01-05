@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-followupboss",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "n8n community node for Follow Up Boss CRM integration",
   "license": "MIT",
   "homepage": "https://github.com/brian-conrya/n8n-nodes-followupboss",
