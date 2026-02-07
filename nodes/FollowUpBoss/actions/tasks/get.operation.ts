@@ -26,10 +26,10 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(
 	this: IExecuteFunctions,
-	index: number,
+	i: number,
 ): Promise<INodeExecutionData[]> {
-	const taskIdRaw = (this.getNodeParameter('taskId', index) as IDataObject).value as string;
-	const taskId = toInt(taskIdRaw, 'Task ID', this.getNode(), index);
+	const taskIdRaw = (this.getNodeParameter('taskId', i) as IDataObject).value as string;
+	const taskId = toInt(taskIdRaw, 'Task ID', this.getNode(), i);
 	const response = await apiRequest.call(this, 'GET', `/tasks/${taskId}`);
-	return wrapData(response);
+	return wrapData(response, i);
 }

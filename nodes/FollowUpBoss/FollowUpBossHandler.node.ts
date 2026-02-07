@@ -7,7 +7,7 @@ import {
 	IDataObject,
 } from 'n8n-workflow';
 import { apiRequest, apiRequestAllItems } from './transport';
-import { getTagsProperty, normalizeTags } from './helpers/utils';
+import { getTagsProperty, normalizeTags, wrapData } from './helpers/utils';
 import { WEBHOOK_EVENT_OPTIONS } from './constants';
 import * as methods from './methods';
 
@@ -420,10 +420,10 @@ export class FollowUpBossHandler implements INodeType {
 				}
 
 				// Output remaining items
-				results.forEach((result) => returnData.push({ json: result }));
+				returnData.push(...wrapData(results, i));
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ json: { error: (error as Error).message } });
+					returnData.push(...wrapData({ error: (error as Error).message }, i));
 				} else {
 					throw error;
 				}

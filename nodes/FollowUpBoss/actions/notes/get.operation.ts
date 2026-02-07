@@ -40,17 +40,17 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(
 	this: IExecuteFunctions,
-	index: number,
+	i: number,
 ): Promise<INodeExecutionData[]> {
-	const noteIdRaw = this.getNodeParameter('noteId', index) as string;
-	const noteId = toInt(noteIdRaw, 'Note ID', this.getNode(), index);
-	const includeThreadedReplies = this.getNodeParameter('includeThreadedReplies', index) as boolean;
-	const includeReactions = this.getNodeParameter('includeReactions', index) as boolean;
+	const noteIdRaw = this.getNodeParameter('noteId', i) as string;
+	const noteId = toInt(noteIdRaw, 'Note ID', this.getNode(), i);
+	const includeThreadedReplies = this.getNodeParameter('includeThreadedReplies', i) as boolean;
+	const includeReactions = this.getNodeParameter('includeReactions', i) as boolean;
 
 	const qs: IDataObject = {};
 	if (includeThreadedReplies) qs.includeThreadedReplies = includeThreadedReplies;
 	if (includeReactions) qs.includeReactions = includeReactions;
 
 	const response = await apiRequest.call(this, 'GET', `/notes/${noteId}`, {}, qs);
-	return wrapData(response);
+	return wrapData(response, i);
 }

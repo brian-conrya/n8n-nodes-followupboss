@@ -1,4 +1,5 @@
 import { IExecuteFunctions, INodeExecutionData, NodeOperationError } from 'n8n-workflow';
+import { wrapData } from '../helpers/utils';
 
 import * as actionPlans from './actionPlans';
 import * as actionPlansPeople from './actionPlansPeople';
@@ -84,7 +85,7 @@ export async function router(this: IExecuteFunctions): Promise<INodeExecutionDat
 		resource as keyof typeof followUpBossNodeData
 	] as unknown as {
 		[key: string]: {
-			execute: (this: IExecuteFunctions, index: number) => Promise<INodeExecutionData[]>;
+			execute: (this: IExecuteFunctions, i: number) => Promise<INodeExecutionData[]>;
 		};
 	};
 	const operationData = resourceData[operation];
@@ -99,7 +100,7 @@ export async function router(this: IExecuteFunctions): Promise<INodeExecutionDat
 			returnData.push(...response);
 		} catch (error) {
 			if (this.continueOnFail()) {
-				returnData.push({ json: { error: error.message } });
+				returnData.push(...wrapData({ error: error.message }, i));
 				continue;
 			}
 			throw error;

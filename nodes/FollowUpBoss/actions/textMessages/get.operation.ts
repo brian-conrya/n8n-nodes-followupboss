@@ -32,5 +32,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const textMessageIdRaw = this.getNodeParameter('textMessageId', i) as string;
 	const textMessageId = toInt(textMessageIdRaw, 'Text Message ID', this.getNode(), i);
 	const response = await apiRequest.call(this, 'GET', `/textMessages/${textMessageId}`);
-	return wrapData(response);
+	return wrapData(response, i);
 }

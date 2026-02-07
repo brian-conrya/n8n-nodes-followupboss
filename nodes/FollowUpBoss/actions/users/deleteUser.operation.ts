@@ -48,5 +48,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const assignTo = this.getNodeParameter('assignTo', i) as number;
 	const qs = { assignTo: assignTo };
 	const response = await apiRequest.call(this, 'DELETE', `/users/${id}`, {}, qs);
-	return wrapData(response);
+	return wrapData(response, i);
 }

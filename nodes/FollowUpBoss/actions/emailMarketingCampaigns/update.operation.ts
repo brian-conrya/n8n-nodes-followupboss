@@ -74,5 +74,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const body: IDataObject = { ...updateFields };
 
 	const response = await apiRequest.call(this, 'PUT', `/emCampaigns/${campaignId}`, body);
-	return wrapData(response);
+	return wrapData(response, i);
 }

@@ -30,10 +30,10 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(
 	this: IExecuteFunctions,
-	index: number,
+	i: number,
 ): Promise<INodeExecutionData[]> {
-	const noteIdRaw = this.getNodeParameter('noteId', index) as string;
-	const noteId = toInt(noteIdRaw, 'Note ID', this.getNode(), index);
+	const noteIdRaw = this.getNodeParameter('noteId', i) as string;
+	const noteId = toInt(noteIdRaw, 'Note ID', this.getNode(), i);
 	await apiRequest.call(this, 'DELETE', `/notes/${noteId}`);
 	return wrapDeleteSuccess();
 }

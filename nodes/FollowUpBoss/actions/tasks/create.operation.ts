@@ -130,12 +130,12 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(
 	this: IExecuteFunctions,
-	index: number,
+	i: number,
 ): Promise<INodeExecutionData[]> {
-	const personIdRaw = (this.getNodeParameter('personId', index) as IDataObject).value as string;
-	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), index);
-	const name = this.getNodeParameter('name', index) as string;
-	const additionalFields = this.getNodeParameter('additionalFields', index) as IDataObject;
+	const personIdRaw = (this.getNodeParameter('personId', i) as IDataObject).value as string;
+	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
+	const name = this.getNodeParameter('name', i) as string;
+	const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
 
 	const body: IDataObject = {
 		personId,
@@ -144,12 +144,12 @@ export async function execute(
 
 	if (additionalFields.assignedUserId) {
 		const assignedUserIdRaw = (additionalFields.assignedUserId as IDataObject).value as string;
-		body.assignedUserId = toInt(assignedUserIdRaw, 'Assigned User ID', this.getNode(), index);
+		body.assignedUserId = toInt(assignedUserIdRaw, 'Assigned User ID', this.getNode(), i);
 		delete additionalFields.assignedUserId;
 	}
 
 	Object.assign(body, additionalFields);
 
 	const response = await apiRequest.call(this, 'POST', '/tasks', body);
-	return wrapData(response);
+	return wrapData(response, i);
 }

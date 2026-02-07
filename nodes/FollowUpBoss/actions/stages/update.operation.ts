@@ -51,5 +51,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 		body.orderWeight = orderWeight;
 	}
 	const response = await apiRequest.call(this, 'PUT', `/stages/${id}`, body);
-	return wrapData(response);
+	return wrapData(response, i);
 }

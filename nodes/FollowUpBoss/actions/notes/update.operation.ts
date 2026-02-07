@@ -61,16 +61,16 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(
 	this: IExecuteFunctions,
-	index: number,
+	i: number,
 ): Promise<INodeExecutionData[]> {
-	const noteIdRaw = this.getNodeParameter('noteId', index) as string;
-	const noteId = toInt(noteIdRaw, 'Note ID', this.getNode(), index);
-	const updateFields = this.getNodeParameter('updateFields', index) as IDataObject;
+	const noteIdRaw = this.getNodeParameter('noteId', i) as string;
+	const noteId = toInt(noteIdRaw, 'Note ID', this.getNode(), i);
+	const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
 
 	const body: IDataObject = {
 		...updateFields,
 	};
 
 	const response = await apiRequest.call(this, 'PUT', `/notes/${noteId}`, body);
-	return wrapData(response);
+	return wrapData(response, i);
 }

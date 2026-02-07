@@ -128,15 +128,15 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(
 	this: IExecuteFunctions,
-	index: number,
+	i: number,
 ): Promise<INodeExecutionData[]> {
-	const appointmentIdRaw = (this.getNodeParameter('appointmentId', index) as IDataObject)
+	const appointmentIdRaw = (this.getNodeParameter('appointmentId', i) as IDataObject)
 		.value as string;
-	const appointmentId = toInt(appointmentIdRaw, 'Appointment ID', this.getNode(), index);
-	const start = this.getNodeParameter('start', index) as string;
-	const end = this.getNodeParameter('end', index) as string;
-	const title = this.getNodeParameter('title', index) as string;
-	const updateFields = this.getNodeParameter('updateFields', index) as IDataObject;
+	const appointmentId = toInt(appointmentIdRaw, 'Appointment ID', this.getNode(), i);
+	const start = this.getNodeParameter('start', i) as string;
+	const end = this.getNodeParameter('end', i) as string;
+	const title = this.getNodeParameter('title', i) as string;
+	const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
 
 	if (updateFields.outcomeId) {
 		updateFields.outcomeId = (updateFields.outcomeId as IDataObject).value;
@@ -149,8 +149,8 @@ export async function execute(
 		...updateFields,
 	};
 
-	if (this.getNodeParameter('typeId', index, undefined)) {
-		body.typeId = (this.getNodeParameter('typeId', index) as IDataObject).value;
+	if (this.getNodeParameter('typeId', i, undefined)) {
+		body.typeId = (this.getNodeParameter('typeId', i) as IDataObject).value;
 	}
 
 	const invitees: IDataObject[] = [];
@@ -160,7 +160,7 @@ export async function execute(
 			.map((s) => s.trim())
 			.filter(Boolean)
 			.forEach((userId) =>
-				invitees.push({ userId: toInt(userId, 'User ID', this.getNode(), index) }),
+				invitees.push({ userId: toInt(userId, 'User ID', this.getNode(), i) }),
 			);
 	}
 	if (updateFields.inviteePersonIds) {
@@ -169,7 +169,7 @@ export async function execute(
 			.map((s) => s.trim())
 			.filter(Boolean)
 			.forEach((personId) =>
-				invitees.push({ personId: toInt(personId, 'Person ID', this.getNode(), index) }),
+				invitees.push({ personId: toInt(personId, 'Person ID', this.getNode(), i) }),
 			);
 	}
 	if (updateFields.inviteeRelationshipIds) {
@@ -179,7 +179,7 @@ export async function execute(
 			.filter(Boolean)
 			.forEach((relationshipId) =>
 				invitees.push({
-					relationshipId: toInt(relationshipId, 'Relationship ID', this.getNode(), index),
+					relationshipId: toInt(relationshipId, 'Relationship ID', this.getNode(), i),
 				}),
 			);
 	}
@@ -201,5 +201,5 @@ export async function execute(
 	delete body.inviteeEmails;
 
 	const response = await apiRequest.call(this, 'PUT', `/appointments/${appointmentId}`, body);
-	return wrapData(response);
+	return wrapData(response, i);
 }

@@ -34,5 +34,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 		.value as string;
 	const relationshipId = toInt(relationshipIdRaw, 'Relationship ID', this.getNode(), i);
 	const response = await apiRequest.call(this, 'GET', `/peopleRelationships/${relationshipId}`);
-	return wrapData(response);
+	return wrapData(response, i);
 }

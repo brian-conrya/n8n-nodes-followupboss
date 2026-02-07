@@ -242,5 +242,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 		`/peopleRelationships/${relationshipId}`,
 		body,
 	);
-	return wrapData(response);
+	return wrapData(response, i);
 }

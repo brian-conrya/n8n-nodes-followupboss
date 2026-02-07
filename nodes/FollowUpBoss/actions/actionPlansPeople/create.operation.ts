@@ -42,5 +42,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 
 	const body = { actionPlanId, personId };
 	const response = await apiRequest.call(this, 'POST', '/actionPlansPeople', body);
-	return wrapData(response);
+	return wrapData(response, i);
 }

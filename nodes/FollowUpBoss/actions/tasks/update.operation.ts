@@ -135,27 +135,27 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(
 	this: IExecuteFunctions,
-	index: number,
+	i: number,
 ): Promise<INodeExecutionData[]> {
-	const taskIdRaw = (this.getNodeParameter('taskId', index) as IDataObject).value as string;
-	const taskId = toInt(taskIdRaw, 'Task ID', this.getNode(), index);
-	const updateFields = this.getNodeParameter('updateFields', index) as IDataObject;
+	const taskIdRaw = (this.getNodeParameter('taskId', i) as IDataObject).value as string;
+	const taskId = toInt(taskIdRaw, 'Task ID', this.getNode(), i);
+	const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
 
 	const body: IDataObject = {};
 
 	if (updateFields.assignedUserId) {
 		const assignedUserIdRaw = (updateFields.assignedUserId as IDataObject).value as string;
-		body.assignedUserId = toInt(assignedUserIdRaw, 'Assigned User ID', this.getNode(), index);
+		body.assignedUserId = toInt(assignedUserIdRaw, 'Assigned User ID', this.getNode(), i);
 		delete updateFields.assignedUserId;
 	}
 	if (updateFields.personId) {
 		const personIdRaw = (updateFields.personId as IDataObject).value as string;
-		body.personId = toInt(personIdRaw, 'Person ID', this.getNode(), index);
+		body.personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 		delete updateFields.personId;
 	}
 
 	Object.assign(body, updateFields);
 
 	const response = await apiRequest.call(this, 'PUT', `/tasks/${taskId}`, body);
-	return wrapData(response);
+	return wrapData(response, i);
 }

@@ -12,5 +12,5 @@ export async function execute(
 	i: number,
 ): Promise<INodeExecutionData[]> {
 	const response = await apiRequestAllItems.call(this, `/${resource}`);
-	return wrapData(response);
+	return wrapData(response, i);
 }

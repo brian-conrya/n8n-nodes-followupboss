@@ -43,5 +43,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	if (phone) qs.phone = phone;
 
 	const response = await apiRequest.call(this, 'GET', '/people/checkDuplicate', {}, qs);
-	return wrapData(response);
+	return wrapData(response, i);
 }

@@ -95,5 +95,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	cleanObject(body);
 
 	const response = await apiRequest.call(this, 'POST', '/emCampaigns', body);
-	return wrapData(response);
+	return wrapData(response, i);
 }

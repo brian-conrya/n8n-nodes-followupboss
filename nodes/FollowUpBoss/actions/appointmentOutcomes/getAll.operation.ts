@@ -24,5 +24,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const limit = returnAll ? undefined : (this.getNodeParameter('limit', i) as number);
 	const outcomes = await apiRequestAllItems.call(this, `/${resource}`, qs, limit);
 
-	return wrapData(outcomes);
+	return wrapData(outcomes, i);
 }

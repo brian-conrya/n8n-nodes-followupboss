@@ -262,8 +262,8 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 			transformedData,
 			'id,firstName,lastName,email,phone,stage,tags,source,created,updated'.split(','),
 		);
-		return wrapData(simplifiedData);
+		return wrapData(simplifiedData, i);
 	}
 
-	return wrapData(response);
+	return wrapData(response, i);
 }

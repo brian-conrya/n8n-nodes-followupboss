@@ -62,5 +62,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	}
 
 	const response = await apiRequest.call(this, 'POST', '/appointmentOutcomes', body);
-	return wrapData(response);
+	return wrapData(response, i);
 }

@@ -27,5 +27,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const idRaw = this.getNodeParameter('id', i) as string;
 	const id = toInt(idRaw, 'Reaction ID', this.getNode(), i);
 	const response = await apiRequest.call(this, 'GET', `/reactions/${id}`);
-	return wrapData(response);
+	return wrapData(response, i);
 }

@@ -21,5 +21,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const limit = returnAll ? undefined : (this.getNodeParameter('limit', i) as number);
 	const relationships = await apiRequestAllItems.call(this, `/${resource}`, qs, limit);
 
-	return wrapData(relationships);
+	return wrapData(relationships, i);
 }

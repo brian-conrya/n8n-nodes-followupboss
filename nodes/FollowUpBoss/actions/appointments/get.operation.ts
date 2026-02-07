@@ -31,11 +31,11 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(
 	this: IExecuteFunctions,
-	index: number,
+	i: number,
 ): Promise<INodeExecutionData[]> {
-	const appointmentIdRaw = (this.getNodeParameter('appointmentId', index) as IDataObject)
+	const appointmentIdRaw = (this.getNodeParameter('appointmentId', i) as IDataObject)
 		.value as string;
-	const appointmentId = toInt(appointmentIdRaw, 'Appointment ID', this.getNode(), index);
+	const appointmentId = toInt(appointmentIdRaw, 'Appointment ID', this.getNode(), i);
 	const response = await apiRequest.call(this, 'GET', `/appointments/${appointmentId}`);
-	return wrapData(response);
+	return wrapData(response, i);
 }

@@ -43,5 +43,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	if (type) qs.type = type;
 
 	const groups = await apiRequestAllItems.call(this, '/groups/roundRobin', qs);
-	return wrapData(groups);
+	return wrapData(groups, i);
 }

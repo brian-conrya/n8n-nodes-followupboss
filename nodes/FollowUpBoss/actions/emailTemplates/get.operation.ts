@@ -47,5 +47,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 		qs.mergePersonId = mergePersonId;
 	}
 	const response = await apiRequest.call(this, 'GET', `/templates/${id}`, {}, qs);
-	return wrapData(response);
+	return wrapData(response, i);
 }

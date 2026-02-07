@@ -177,5 +177,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	}
 
 	const response = await apiRequest.call(this, 'PUT', `/pipelines/${id}`, body);
-	return wrapData(response);
+	return wrapData(response, i);
 }

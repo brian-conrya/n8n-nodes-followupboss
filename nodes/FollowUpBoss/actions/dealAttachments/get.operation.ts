@@ -32,5 +32,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const attachmentIdRaw = this.getNodeParameter('attachmentId', i) as string;
 	const attachmentId = toInt(attachmentIdRaw, 'Attachment ID', this.getNode(), i);
 	const response = await apiRequest.call(this, 'GET', `/dealAttachments/${attachmentId}`);
-	return wrapData(response);
+	return wrapData(response, i);
 }

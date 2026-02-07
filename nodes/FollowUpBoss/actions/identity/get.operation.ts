@@ -10,5 +10,5 @@ export async function execute(
 	i: number,
 ): Promise<INodeExecutionData[]> {
 	const response = await apiRequest.call(this, 'GET', '/identity');
-	return wrapData(response);
+	return wrapData(response, i);
 }

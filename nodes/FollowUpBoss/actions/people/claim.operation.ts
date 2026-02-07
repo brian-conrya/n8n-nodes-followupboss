@@ -28,5 +28,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const personIdRaw = (this.getNodeParameter('personId', i) as IDataObject).value as string;
 	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	const response = await apiRequest.call(this, 'POST', `/people/claim/${personId}`);
-	return wrapData(response);
+	return wrapData(response, i);
 }

@@ -55,13 +55,13 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(
 	this: IExecuteFunctions,
-	index: number,
+	i: number,
 ): Promise<INodeExecutionData[]> {
-	const personIdRaw = (this.getNodeParameter('personId', index) as IDataObject).value as string;
-	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), index);
-	const bodyContent = this.getNodeParameter('body', index) as string;
-	const subject = this.getNodeParameter('subject', index) as string;
-	const isHtml = this.getNodeParameter('isHtml', index) as boolean;
+	const personIdRaw = (this.getNodeParameter('personId', i) as IDataObject).value as string;
+	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
+	const bodyContent = this.getNodeParameter('body', i) as string;
+	const subject = this.getNodeParameter('subject', i) as string;
+	const isHtml = this.getNodeParameter('isHtml', i) as boolean;
 
 	const body = {
 		personId,
@@ -71,5 +71,5 @@ export async function execute(
 	};
 
 	const response = await apiRequest.call(this, 'POST', '/notes', body);
-	return wrapData(response);
+	return wrapData(response, i);
 }

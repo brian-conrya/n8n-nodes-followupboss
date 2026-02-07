@@ -48,5 +48,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const body = { tags };
 	const qs = { mergeTags: true };
 	const response = await apiRequest.call(this, 'PUT', `/people/${personId}`, body, qs);
-	return wrapData(response);
+	return wrapData(response, i);
 }

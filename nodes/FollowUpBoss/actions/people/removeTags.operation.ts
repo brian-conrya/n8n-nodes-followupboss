@@ -62,9 +62,9 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	if (newTags.length !== currentTags.length) {
 		const body = { tags: newTags };
 		const response = await apiRequest.call(this, 'PUT', `/people/${personId}`, body);
-		return wrapData(response);
+		return wrapData(response, i);
 	}
 
 	// No changes needed, return current person data
-	return wrapData(currentPerson);
+	return wrapData(currentPerson, i);
 }

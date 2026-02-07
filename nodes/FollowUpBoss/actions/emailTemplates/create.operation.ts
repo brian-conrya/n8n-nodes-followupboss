@@ -66,5 +66,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const isShared = this.getNodeParameter('isShared', i) as boolean;
 	const body = { name, subject, body: bodyContent, isShared };
 	const response = await apiRequest.call(this, 'POST', '/templates', body);
-	return wrapData(response);
+	return wrapData(response, i);
 }

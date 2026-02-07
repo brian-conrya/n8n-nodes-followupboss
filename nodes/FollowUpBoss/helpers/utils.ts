@@ -109,12 +109,16 @@ export function updateDisplayOptions(
 	});
 }
 
-export function wrapData(data: IDataObject | IDataObject[]): INodeExecutionData[] {
+export function wrapData(
+	data: IDataObject | IDataObject[],
+	itemIndex?: number,
+): INodeExecutionData[] {
 	if (!Array.isArray(data)) {
-		return [{ json: data }];
+		return [{ json: data, pairedItem: itemIndex !== undefined ? { item: itemIndex } : undefined }];
 	}
 	return data.map((item) => ({
 		json: item,
+		pairedItem: itemIndex !== undefined ? { item: itemIndex } : undefined,
 	}));
 }
 
@@ -214,14 +218,14 @@ export function getResourceLocatorProperty(options: IResourceLocatorOptions): IN
 			placeholder: isNumericId ? '123' : 'e.g. Stage Name',
 			validation: isNumericId
 				? [
-						{
-							type: 'regex',
-							properties: {
-								regex: '[0-9]+',
-								errorMessage: `Not a valid ${displayName} ID`,
-							},
+					{
+						type: 'regex',
+						properties: {
+							regex: '[0-9]+',
+							errorMessage: `Not a valid ${displayName} ID`,
 						},
-					]
+					},
+				]
 				: [],
 		},
 	];

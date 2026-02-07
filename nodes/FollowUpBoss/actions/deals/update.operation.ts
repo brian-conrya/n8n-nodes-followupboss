@@ -166,12 +166,12 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(
 	this: IExecuteFunctions,
-	index: number,
+	i: number,
 ): Promise<INodeExecutionData[]> {
-	const dealIdRaw = (this.getNodeParameter('dealId', index) as IDataObject).value as string;
-	const dealId = toInt(dealIdRaw, 'Deal ID', this.getNode(), index);
+	const dealIdRaw = (this.getNodeParameter('dealId', i) as IDataObject).value as string;
+	const dealId = toInt(dealIdRaw, 'Deal ID', this.getNode(), i);
 
-	const updateFields = this.getNodeParameter('updateFields', index) as IDataObject;
+	const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
 	const body: IDataObject = { ...updateFields };
 
 	if (body.agentCommission) {
@@ -179,7 +179,7 @@ export async function execute(
 			body.agentCommission as string,
 			'Agent Commission',
 			this.getNode(),
-			index,
+			i,
 		);
 	}
 	if (body.commissionValue) {
@@ -187,38 +187,38 @@ export async function execute(
 			body.commissionValue as string,
 			'Commission Value',
 			this.getNode(),
-			index,
+			i,
 		);
 	}
 	if (body.orderWeight) {
-		body.orderWeight = toInt(body.orderWeight as string, 'Order Weight', this.getNode(), index);
+		body.orderWeight = toInt(body.orderWeight as string, 'Order Weight', this.getNode(), i);
 	}
 	if (body.peopleIds) {
 		const peopleIdsRaw = body.peopleIds as string;
 		body.peopleIds = peopleIdsRaw
 			.split(',')
-			.map((id) => toInt(id.trim(), 'People ID', this.getNode(), index));
+			.map((id) => toInt(id.trim(), 'People ID', this.getNode(), i));
 	}
 	if (body.price) {
-		body.price = toInt(body.price as string, 'Price', this.getNode(), index);
+		body.price = toInt(body.price as string, 'Price', this.getNode(), i);
 	}
 	if (body.stageId) {
 		const stageIdRaw = (body.stageId as IDataObject).value as string;
-		body.stageId = toInt(stageIdRaw, 'Stage ID', this.getNode(), index);
+		body.stageId = toInt(stageIdRaw, 'Stage ID', this.getNode(), i);
 	}
 	if (body.teamCommission) {
 		body.teamCommission = toInt(
 			body.teamCommission as string,
 			'Team Commission',
 			this.getNode(),
-			index,
+			i,
 		);
 	}
 	if (body.userIds) {
 		const userIds = body.userIds as string[];
-		body.userIds = userIds.map((id) => toInt(id as string, 'User ID', this.getNode(), index));
+		body.userIds = userIds.map((id) => toInt(id as string, 'User ID', this.getNode(), i));
 	}
 
 	const response = await apiRequest.call(this, 'PUT', `/deals/${dealId}`, body);
-	return wrapData(response);
+	return wrapData(response, i);
 }

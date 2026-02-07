@@ -41,5 +41,5 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const orderWeight = this.getNodeParameter('orderWeight', i) as number;
 	const body = { name, orderWeight };
 	const response = await apiRequest.call(this, 'POST', '/stages', body);
-	return wrapData(response);
+	return wrapData(response, i);
 }
