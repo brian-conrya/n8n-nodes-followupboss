@@ -42,7 +42,8 @@ import * as threadedReplies from './actions/threadedReplies';
 import * as timeframes from './actions/timeframes';
 import * as users from './actions/users';
 import * as methods from './methods';
-import { router } from './actions/router';
+import { getOperation } from './actions/router';
+import { wrapData } from './helpers/utils';
 
 export class FollowUpBoss implements INodeType {
 	description: INodeTypeDescription = {
@@ -291,6 +292,24 @@ export class FollowUpBoss implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		return await router.call(this);
+		const items = this.getInputData();
+		const returnData: INodeExecutionData[] = [];
+		const resource = this.getNodeParameter('resource', 0) as string;
+		const operation = this.getNodeParameter('operation', 0) as string;
+		const operationFn = getOperation(resource, operation, this.getNode());
+
+		for (let i = 0; i < items.length; i++) {
+			try {
+				returnData.push(...(await operationFn.call(this, i)));
+			} catch (error) {
+				if (this.continueOnFail()) {
+					returnData.push(...wrapData({ error: (error as Error).message }, i));
+					continue;
+				}
+				throw error;
+			}
+		}
+
+		return [returnData];
 	}
 }

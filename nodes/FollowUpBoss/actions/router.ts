@@ -1,5 +1,4 @@
-import { IExecuteFunctions, INodeExecutionData, NodeOperationError } from 'n8n-workflow';
-import { wrapData } from '../helpers/utils';
+import { IExecuteFunctions, INode, INodeExecutionData, NodeOperationError } from 'n8n-workflow';
 
 import * as actionPlans from './actionPlans';
 import * as actionPlansPeople from './actionPlansPeople';
@@ -75,37 +74,22 @@ export const followUpBossNodeData = {
 	users,
 };
 
-export async function router(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-	const items = this.getInputData();
-	const returnData: INodeExecutionData[] = [];
-	const resource = this.getNodeParameter('resource', 0) as string;
-	const operation = this.getNodeParameter('operation', 0) as string;
+export type OperationExecuteFn = (
+	this: IExecuteFunctions,
+	i: number,
+) => Promise<INodeExecutionData[]>;
 
+export function getOperation(resource: string, operation: string, node: INode): OperationExecuteFn {
 	const resourceData = followUpBossNodeData[
 		resource as keyof typeof followUpBossNodeData
 	] as unknown as {
-		[key: string]: {
-			execute: (this: IExecuteFunctions, i: number) => Promise<INodeExecutionData[]>;
-		};
+		[key: string]: { execute: OperationExecuteFn };
 	};
-	const operationData = resourceData[operation];
+	const operationData = resourceData?.[operation];
 
 	if (!operationData) {
-		throw new NodeOperationError(this.getNode(), `The operation "${operation}" is not known!`);
+		throw new NodeOperationError(node, `The operation "${operation}" is not known!`);
 	}
 
-	for (let i = 0; i < items.length; i++) {
-		try {
-			const response = await operationData.execute.call(this, i);
-			returnData.push(...response);
-		} catch (error) {
-			if (this.continueOnFail()) {
-				returnData.push(...wrapData({ error: error.message }, i));
-				continue;
-			}
-			throw error;
-		}
-	}
-
-	return [returnData];
+	return operationData.execute;
 }
