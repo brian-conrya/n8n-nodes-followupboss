@@ -1,0 +1,17 @@
+{
+	"git": {
+		"commitMessage": "release: v${version}",
+		"tagName": "v${version}",
+		"push": true
+	},
+	"npm": {
+		"publish": true
+	},
+	"github": {
+		"release": true,
+		"releaseName": "v${version}"
+	},
+	"hooks": {
+		"before:init": ["npm run lint", "npm run build"]
+	}
+}
