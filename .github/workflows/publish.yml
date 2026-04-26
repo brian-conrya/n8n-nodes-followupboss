@@ -57,6 +57,6 @@ jobs:
       - name: Release
         run: |
           [ -n "$NPM_TOKEN" ] && npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
-          npx release-it --ci --no-git --npm.publish --npm.provenance
+          npx release-it --ci --no-git --npm.publish --npm.provenance --npm.skipChecks
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
