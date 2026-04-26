@@ -76,7 +76,7 @@ async function makeRequest(
 			// 429 Too Many Requests
 			if (status === 429) {
 				const retryAfter = error.response?.headers['retry-after'];
-				let waitTime = 0;
+				let waitTime: number;
 				if (retryAfter) {
 					waitTime = (parseInt(retryAfter, 10) + 1) * 1000;
 				} else {

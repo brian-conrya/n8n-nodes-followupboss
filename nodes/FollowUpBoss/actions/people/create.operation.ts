@@ -340,7 +340,7 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	}
 
 	const tagsMode = this.getNodeParameter('tagsMode', i, 'manual') as string;
-	let tags: string[] = [];
+	let tags: string[];
 	if (tagsMode === 'manual') {
 		const tagsManual = this.getNodeParameter('tagsManual', i, '') as string;
 		tags = normalizeTags(tagsMode, tagsManual, undefined);

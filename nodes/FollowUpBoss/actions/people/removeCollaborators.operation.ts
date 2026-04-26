@@ -63,7 +63,7 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const personId = toInt(personIdRaw, 'Person ID', this.getNode(), i);
 	const mode = this.getNodeParameter('mode', i) as string;
 
-	let updatedCollaborators: IDataObject[] = [];
+	let updatedCollaborators: IDataObject[];
 
 	if (mode === 'specific') {
 		const collaboratorIds = this.getNodeParameter('collaboratorIds', i) as number[];
