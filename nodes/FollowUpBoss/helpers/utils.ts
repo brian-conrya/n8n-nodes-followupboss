@@ -245,7 +245,7 @@ export function getResourceLocatorProperty(options: IResourceLocatorOptions): IN
 	}
 
 	modes.push({
-		displayName: 'From list',
+		displayName: 'From List',
 		name: 'list',
 		type: 'list',
 		default: '',

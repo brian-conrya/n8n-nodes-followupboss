@@ -9,13 +9,13 @@ This node is designed as the entry point for webhook-based workflows. It registe
 **Typical Flow**:
 
 ```
-Trigger → Handler → [Other Nodes]
-  ↓         ↓
- Raw    Hydrated
-Payload  + Filtered
+Trigger → Follow Up Boss (Webhook Event) → [Other Nodes]
+  ↓                  ↓
+ Raw            Hydrated
+Payload        + Filtered
 ```
 
-Use the **[Follow Up Boss Handler](FollowUpBossHandler.md)** downstream to fetch full data and filter events.
+Use the **[Follow Up Boss](FollowUpBoss.md#webhook-event-resource)** node's **Webhook Event** resource downstream to fetch full data and filter events.
 
 ## Configuration
 
@@ -89,7 +89,7 @@ The trigger outputs the raw webhook payload with the following structure:
 
 ```
 Trigger (People Created)
-  → Handler (Hydrate)
+  → Follow Up Boss (Webhook Event → Get Full Data)
     → [Process full person data]
 ```
 
@@ -97,7 +97,7 @@ Trigger (People Created)
 
 ```
 Trigger (People Tags Created)
-  → Handler (Filter: Tags → "Hot Lead")
+  → Follow Up Boss (Webhook Event → Filter by Tags Created → "Hot Lead")
     → Send Notification
 ```
 
@@ -105,7 +105,7 @@ Trigger (People Tags Created)
 
 ```
 Trigger (People Updated)
-  → Handler (Filter: Webhook Event → peopleUpdated)
+  → Follow Up Boss (Webhook Event → Filter by Webhook Event → peopleUpdated)
     → Switch (on person.source)
       → Case "Website" → Workflow A
       → Case "Referral" → Workflow B
@@ -124,5 +124,4 @@ This node supports both API Key and OAuth2 authentication.
 
 ## Related Nodes
 
-- **[Follow Up Boss Handler](FollowUpBossHandler.md)** - Hydrates and filters webhook events (use downstream)
-- **[Follow Up Boss](FollowUpBoss.md)** - Main node for API operations
+- **[Follow Up Boss](FollowUpBoss.md)** — Main node for API operations; the **Webhook Event** resource hydrates and filters webhook events (use downstream of this trigger)

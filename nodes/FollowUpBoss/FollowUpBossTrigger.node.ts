@@ -80,7 +80,7 @@ export class FollowUpBossTrigger implements INodeType {
 			},
 			{
 				displayName:
-					'Only 1 active workflow per event (the 2nd slot is reserved for testing). Activating a new workflow will disconnect any previous one for this event. Need more? Use an Execute Workflow node to fan out from a single trigger.',
+					'Only One Active Workflow Per Event. The Second Slot Is Reserved for Testing. Activating a New Workflow Disconnects Any Previous One. Pair With the Follow Up Boss Node (Webhook Event Resource) to Hydrate and Filter, and Use an Execute Workflow Node to Fan Out From a Single Trigger.',
 				name: 'limitationNotice',
 				type: 'notice',
 				default: '',

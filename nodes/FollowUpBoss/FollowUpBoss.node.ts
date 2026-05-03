@@ -41,6 +41,7 @@ import * as textMessageTemplates from './actions/textMessageTemplates';
 import * as threadedReplies from './actions/threadedReplies';
 import * as timeframes from './actions/timeframes';
 import * as users from './actions/users';
+import * as webhookEvents from './actions/webhookEvents';
 import * as methods from './methods';
 import { getOperation } from './actions/router';
 import { wrapData } from './helpers/utils';
@@ -245,6 +246,10 @@ export class FollowUpBoss implements INodeType {
 						name: 'User',
 						value: 'users',
 					},
+					{
+						name: 'Webhook Event',
+						value: 'webhookEvents',
+					},
 				],
 				default: 'people',
 			},
@@ -283,6 +288,7 @@ export class FollowUpBoss implements INodeType {
 			...threadedReplies.description,
 			...timeframes.description,
 			...users.description,
+			...webhookEvents.description,
 		],
 	};
 

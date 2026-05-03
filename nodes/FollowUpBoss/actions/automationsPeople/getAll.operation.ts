@@ -47,7 +47,7 @@ export const description: INodeProperties[] = createGetAllOperationDescription({
 				},
 			],
 			default: 'Running',
-			description: 'Automation Status to filter by',
+			description: 'Automation status to filter by',
 		},
 	],
 });

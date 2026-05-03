@@ -35,6 +35,7 @@ import * as textMessageTemplates from './textMessageTemplates';
 import * as threadedReplies from './threadedReplies';
 import * as timeframes from './timeframes';
 import * as users from './users';
+import * as webhookEvents from './webhookEvents';
 
 export const followUpBossNodeData = {
 	actionPlans,
@@ -72,6 +73,7 @@ export const followUpBossNodeData = {
 	threadedReplies,
 	timeframes,
 	users,
+	webhookEvents,
 };
 
 export type OperationExecuteFn = (
